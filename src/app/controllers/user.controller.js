@@ -70,6 +70,7 @@ class UserController {
   getAllUsersByUsername = async (req, res, next) => {
     try {
       const { username, limit, skip } = req.query;
+      const allUsers = await UserModel.find({}).sort({ createdAt: -1 })
 
       if (limit || skip) {
         const users =
@@ -78,10 +79,11 @@ class UserController {
               .sort({ createdAt: -1 })
               .limit(limit)
               .skip(skip)
-            : await UserModel.find({}).sort({ createdAt: -1 });
+            : allUsers;
 
         return res.status(200).json({
           msg: "Get all users successfully",
+          totalUsers: allUsers.length,
           users,
         });
       }
@@ -103,6 +105,7 @@ class UserController {
 
         return res.status(200).json({
           msg: "Get all users successfully",
+          totalUsers: users.length,
           users,
         });
       }
@@ -110,6 +113,7 @@ class UserController {
       const users = await UserModel.find({});
       return res.status(200).json({
         msg: "Get all users successfully",
+        totalUsers: users.length,
         users,
       });
     } catch (error) {

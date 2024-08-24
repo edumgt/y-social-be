@@ -84,18 +84,18 @@ class PostController {
   getAllPosts = async (req, res) => {
     try {
       const { limit, skip } = req.query;
+      const allPosts = await PostModel.find({}).sort({ createdAt: -1 });
       const posts =
         limit || skip
           ? await PostModel.find({})
-              .sort({ createdAt: -1 })
-              .limit(limit)
-              .skip(skip)
-          : await PostModel.find({}).sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .skip(skip)
+          : allPosts;
 
-      const countPosts = await PostModel.countDocuments();
       return res.status(200).json({
         msg: "Get all posts successfully",
-        length: countPosts,
+        length: allPosts.length,
         posts,
       });
     } catch (error) {
@@ -170,7 +170,11 @@ class PostController {
           post.img = img || post.img;
         }
 
-        post.video = video || post.video;
+        if (video === null) {
+          post.video = "";
+        } else {
+          post.video = video || post.video;
+        }
 
         const updatedPost = await post.save();
 
