@@ -1,5 +1,6 @@
 {
   "conventionalCommits.scopes": [
-    "enhance"
+    "enhance",
+    "feature"
   ]
 }
