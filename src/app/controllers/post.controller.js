@@ -138,6 +138,24 @@ class PostController {
     }
   };
 
+  getByContent = async (req, res) => {
+    const content = req.query.q;
+    let postList = [];
+
+    if (content) {
+      postList = await PostModel.find({
+        desc: { $regex: content, $options: 'i' }
+      }).sort({ createdAt: -1 });
+    } else {
+      postList = await PostModel.find({}).sort({ createdAt: -1 });
+    }
+
+    return res.status(200).json({
+      msg: 'Get posts successfully',
+      data: postList
+    });
+  }
+
   getPostByID = async (req, res) => {
     const postID = req.params.postID;
     const post = await PostModel.findById(postID);

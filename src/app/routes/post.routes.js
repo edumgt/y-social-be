@@ -16,6 +16,7 @@ router.get(
   userMiddleware.validateUserById,
   postController.getAllPostsByUser,
 );
+router.get("/get-post/content", postController.getByContent);
 router.get(
   "/get-post/:postID",
   PostMiddleware.validatePostID,
