@@ -1,25 +1,25 @@
 const mongoose = require("mongoose");
 
-const adAnalyticsSchema = new mongoose.Schema(
+const dailyAdAnalyticsSchema = new mongoose.Schema(
     {
-        adID: {
-            type: String,
+        date: {
+            type: Date,
             required: true,
         },
         impressions: {
             type: Number,
-            required: true,
+            default: 0,
         },
         clicks: {
             type: Number,
-            required: true,
+            default: 0,
         },
         conversions: {
             type: Number,
-            required: true,
+            default: 0,
         },
     },
-    { timestamps: true }
+    { _id: false }
 );
 
 const goalSchema = new mongoose.Schema(
@@ -79,6 +79,11 @@ const adsSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
+        currency: {
+            type: String,
+            default: 'vnd',
+            enum: ['usd', 'vnd'],
+        },
         schedule_start: {
             type: Date,
             required: true,
@@ -101,9 +106,7 @@ const adsSchema = new mongoose.Schema(
         adTargetAudience: {
             type: targetAudienceSchema,
         },
-        result: {
-            type: adAnalyticsSchema,
-        },
+        result: [dailyAdAnalyticsSchema]
     },
     { timestamps: true }
 );

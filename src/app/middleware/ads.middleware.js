@@ -1,11 +1,20 @@
 const { body, validationResult } = require('express-validator');
 
 const validateAdCreation = [
-    body('title').isString().withMessage('Title is required'),
-    body('description').isString().withMessage('Description is required'),
+    body('title').isString().trim().withMessage('Title is required'),
+    body('description').isString().trim().withMessage('Description is required'),
     body('budget').isNumeric().withMessage('Budget must be a number'),
     body('schedule_start').isISO8601().withMessage('Schedule start must be a valid date'),
-    // Add more validations as needed
+    body('schedule_end').optional().isISO8601().withMessage('Schedule end must be a valid date'),
+    body('goal.goalID').isString().withMessage('Goal ID is required'),
+
+    // Custom validator example
+    body('schedule_end').custom((value, { req }) => {
+        if (new Date(value) < new Date(req.body.schedule_start)) {
+            throw new Error('Schedule end date must be after start date');
+        }
+        return true;
+    }),
 
     (req, res, next) => {
         const errors = validationResult(req);
@@ -34,22 +43,28 @@ const validateAdUpdate = [
 
 // src/middleware/adAuthorization.js
 
-const adAuthorization = (req, res, next) => {
-    // Example check (replace with actual authorization logic)
-    const userId = req.userId; // Assumes userId is added to req by previous middleware
-    const adId = req.params.id; // Assuming ad ID is in params
+const adAuthorization = async (req, res, next) => {
+    const userId = req.userId; // Assuming userId is added to req by previous middleware
+    const adId = req.params.id;
 
-    // Implement your authorization logic here
-    // For example, check if the user owns the ad
-    if (userId && adId) {
-        // Mock check (replace with actual authorization logic)
-        if (true) { // Replace with actual ownership check
-            next();
-        } else {
-            res.status(403).json({ error: 'Forbidden' });
+    if (!userId || !adId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    try {
+        // Example: Fetch the ad from the repository to check ownership
+        const ad = await adService.getAdById(adId);
+        if (!ad) {
+            return res.status(404).json({ error: 'Ad not found' });
         }
-    } else {
-        res.status(401).json({ error: 'Unauthorized' });
+
+        if (ad.userID !== userId) {
+            return res.status(403).json({ error: 'User does not have permission to modify this ad' });
+        }
+
+        next();
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 };
 

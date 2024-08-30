@@ -1,50 +1,104 @@
-const { adService } = require("../services/ads.service");
+const { adsService } = require('../services/ads.service');
+const { handleRequest } = require('../utils/handle-request');
 
-class AdController {
-    handleRequest = async (req, res, operation) => {
-        try {
-            const result = await operation();
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    };
+class AdsController {
+    async createAd(req, res) {
+        await handleRequest(req, res, async () => {
+            const adData = {
+                userID: req.userId,
+                ...req.body
+            };
 
-    createAd = (req, res) => {
-        handleRequest(req, res, () => adService.createAd(req.body));
-    };
+            // Set schedule_start to today's date if not provided
+            if (!adData.schedule_start) {
+                adData.schedule_start = new Date();
+            }
 
-    updateAd = (req, res) => {
-        handleRequest(req, res, () => adService.updateAd(req.params.id, req.body));
-    };
+            // Initialize result with today's date
+            adData.result = [{
+                date: new Date(),
+                impressions: 0,
+                clicks: 0,
+                conversions: 0
+            }];
 
-    deleteAd = (req, res) => {
-        handleRequest(req, res, () => adService.deleteAd(req.params.id));
-    };
+            return await adsService.createAd(adData);
+        });
+    }
 
-    getAllAds = (req, res) => {
-        handleRequest(req, res, () => adService.getAllAds());
-    };
 
-    getAdByID = (req, res) => {
-        handleRequest(req, res, () => adService.getAdByID(req.params.id));
-    };
+    // Update an existing ad
+    async updateAd(req, res) {
+        await handleRequest(req, res, async () => {
+            const adId = req.params.id;
+            const updatedAd = await adsService.updateAd(adId, req.body);
+            if (!updatedAd) {
+                throw new Error('Ad not found');
+            }
+            return updatedAd;
+        });
+    }
 
-    getAdByUser = (req, res) => {
-        handleRequest(req, res, () => adService.getAdByUser(req.params.userId));
-    };
+    // Delete an ad by ID
+    async deleteAd(req, res) {
+        await handleRequest(req, res, async () => {
+            const adId = req.params.id;
+            const result = await adsService.deleteAd(adId);
+            if (result.error) {
+                throw new Error('Ad not found');
+            }
+            return { message: 'Ad deleted successfully' };
+        });
+    }
 
-    deleteAllAdByUser = (req, res) => {
-        handleRequest(req, res, () => adService.deleteAllAdByUser(req.params.userId));
-    };
+    // Get all ads
+    async getAllAds(req, res) {
+        await handleRequest(req, res, async () => {
+            return await adsService.getAllAds();
+        });
+    }
 
-    getAdByTrend = (req, res) => {
-        handleRequest(req, res, () => adService.getAdByTrend());
-    };
+    // Get a single ad by ID
+    async getAdById(req, res) {
+        await handleRequest(req, res, async () => {
+            const adId = req.params.id;
+            const ad = await adsService.getAdById(adId);
+            if (!ad) {
+                throw new Error('Ad not found');
+            }
+            return ad;
+        });
+    }
+
+    // Get all ads by a specific user
+    async getAdByUser(req, res) {
+        await handleRequest(req, res, async () => {
+            const userId = req.params.userId;
+            const ads = await adsService.getAdByUser(userId);
+            if (!ads.length) {
+                throw new Error('No ads found for this user');
+            }
+            return ads;
+        });
+    }
+
+    // Delete all ads by a specific user
+    async deleteAllAdByUser(req, res) {
+        await handleRequest(req, res, async () => {
+            const userId = req.params.userId;
+            await adsService.deleteAllAdByUser(userId);
+            return { message: 'All ads for the user deleted successfully' };
+        });
+    }
+
+    // Get trending ads
+    async getAdByTrend(req, res) {
+        await handleRequest(req, res, async () => {
+            return await adsService.getAdByTrend();
+        });
+    }
 }
 
-const adController = new AdController();
+const adsController = new AdsController();
 
-module.exports = {
-    adController,
-};
+module.exports = { adsController };
