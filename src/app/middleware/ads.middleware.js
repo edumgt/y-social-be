@@ -1,4 +1,8 @@
 const { body, validationResult } = require('express-validator');
+const { adsService } = require('../services/ads.service');
+const adModel = require('../models/ads.model');
+const { MIN_BUDGET } = require('../constants/ads');
+const { ERRORS } = require('../constants/error');
 
 const validateAdCreation = [
     body('title').isString().trim().withMessage('Title is required'),
@@ -8,7 +12,6 @@ const validateAdCreation = [
     body('schedule_end').optional().isISO8601().withMessage('Schedule end must be a valid date'),
     body('goal.goalID').isString().withMessage('Goal ID is required'),
 
-    // Custom validator example
     body('schedule_end').custom((value, { req }) => {
         if (new Date(value) < new Date(req.body.schedule_start)) {
             throw new Error('Schedule end date must be after start date');
@@ -30,6 +33,7 @@ const validateAdUpdate = [
     body('description').optional().isString().withMessage('Description must be a string'),
     body('budget').optional().isNumeric().withMessage('Budget must be a number'),
     body('schedule_start').optional().isISO8601().withMessage('Schedule start must be a valid date'),
+    body('schedule_end').optional().isISO8601().withMessage('Schedule start must be a valid date'),
     // Add more validations as needed
 
     (req, res, next) => {
@@ -37,25 +41,47 @@ const validateAdUpdate = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
+
+        const isAdExisted = adModel.findById(req.params.id);
+        if (!isAdExisted) {
+            return res.status(400).json({ errors: "This ad not existed" });
+        }
+
         next();
     }
 ];
 
-// src/middleware/adAuthorization.js
+const validateBudget = async (req, res, next) => {
+    try {
+        const adId = req.params.id;
+        const updateData = req.body;
+        const ad = await adsService.getAdById(adId);
+        const minBudget = MIN_BUDGET[ad.currency];
+
+        if (minBudget !== undefined && updateData.budget < minBudget) {
+            return res.status(400).json({
+                errors: `Budget must be at least ${minBudget} ${ad.currency}`
+            });
+        }
+
+        next();
+    } catch (error) {
+        return res.status(500).json({ errors: ERRORS.DEFAULT });
+    }
+};
 
 const adAuthorization = async (req, res, next) => {
-    const userId = req.userId; // Assuming userId is added to req by previous middleware
+    const { userId } = req.body
     const adId = req.params.id;
 
     if (!userId || !adId) {
-        return res.status(401).json({ error: 'Unauthorized' });
+        return res.status(401).json({ error: ERRORS.AUTHORIZED });
     }
 
     try {
-        // Example: Fetch the ad from the repository to check ownership
-        const ad = await adService.getAdById(adId);
+        const ad = await adsService.getAdById(adId);
         if (!ad) {
-            return res.status(404).json({ error: 'Ad not found' });
+            return res.status(404).json({ error: ERRORS.NOT_FOUND });
         }
 
         if (ad.userID !== userId) {
@@ -64,8 +90,8 @@ const adAuthorization = async (req, res, next) => {
 
         next();
     } catch (error) {
-        return res.status(500).json({ error: 'Internal Server Error' });
+        return res.status(500).json({ error: ERRORS.DEFAULT });
     }
 };
 
-module.exports = { validateAdCreation, validateAdUpdate, adAuthorization };
+module.exports = { validateAdCreation, validateAdUpdate, validateBudget, adAuthorization };

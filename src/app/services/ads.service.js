@@ -18,19 +18,18 @@ class AdsService {
         return ad; // Optional: return the updated ad
     }
 
-    // Create a new ad
     async createAd(data) {
         try {
-            // Example of additional business logic (e.g., ensuring budget is within a certain range)
             if (data.budget < 0) {
                 throw new Error('Budget must be a positive number');
             }
 
-            // Interact with the repository to create the ad
+            const MIN_BUDGET = 30000;
+
             return await adsRepository.create(data);
         } catch (error) {
             console.error('Error creating ad:', error.message);
-            throw error; // Propagate the error to be caught by the controller
+            throw error;
         }
     }
 
@@ -48,7 +47,6 @@ class AdsService {
         }
     }
 
-    // Update an ad by ID
     async updateAd(id, data) {
         try {
             const updatedAd = await adsRepository.update(id, data);
@@ -58,11 +56,10 @@ class AdsService {
             return updatedAd;
         } catch (error) {
             console.error('Error updating ad:', error.message);
-            throw error; // Propagate the error to be caught by the controller
+            throw error;
         }
     }
 
-    // Delete an ad by ID
     async deleteAd(id) {
         try {
             const ad = await adsRepository.findById(id);

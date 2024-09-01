@@ -23,7 +23,6 @@ class AdsRepository extends IAds {
         }
     }
 
-    // Update an ad by ID
     async update(id, adData) {
         try {
             return await AdModel.findByIdAndUpdate(id, adData, { new: true }).exec();
