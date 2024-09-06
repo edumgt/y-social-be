@@ -1,8 +1,10 @@
-const { IAds } = require('../interfaces/ads.interface');
+const { STRATEGY } = require('../constants/ads');
+const { IAds } = require('./interfaces/ads.interface');
 const AdModel = require('../models/ads.model');
+const { ERRORS_ADS_REPOSITORY } = require('./constants/error');
+const { formula } = require("../lib/formula");
 
 class AdsRepository extends IAds {
-    // Create a new ad
     async create(adData) {
         try {
             const ad = new AdModel(adData);
@@ -13,7 +15,6 @@ class AdsRepository extends IAds {
         }
     }
 
-    // Find an ad by ID
     async findById(id) {
         try {
             return await AdModel.findById(id).exec();
@@ -32,7 +33,6 @@ class AdsRepository extends IAds {
         }
     }
 
-    // Delete an ad by ID
     async delete(id) {
         try {
             return await AdModel.findByIdAndDelete(id).exec();
@@ -42,7 +42,6 @@ class AdsRepository extends IAds {
         }
     }
 
-    // Find all ads
     async findAll() {
         try {
             return await AdModel.find().exec();
@@ -52,7 +51,6 @@ class AdsRepository extends IAds {
         }
     }
 
-    // Find all ads by a specific user
     async findByUser(userId) {
         try {
             return await AdModel.find({ userID: userId }).exec();
@@ -62,7 +60,6 @@ class AdsRepository extends IAds {
         }
     }
 
-    // Delete all ads by a specific user
     async deleteAllByUser(userId) {
         try {
             return await AdModel.deleteMany({ userID: userId }).exec();
@@ -72,13 +69,38 @@ class AdsRepository extends IAds {
         }
     }
 
-    // Find trending ads (Example logic, modify as needed)
+    async calculateAdsScore(ad) {
+        const { result, _id } = ad;
+        const { impressions, clicks, conversions } = result;
+
+        // Await asynchronous methods
+        const totalInteractions = await formula.calculateTotalInteractions(_id);
+        const totalCost = await formula.calculateTotalCost(_id);
+        const scores = formula.calculateTrendingScore(clicks, impressions, conversions, totalCost, totalInteractions);
+
+        return scores / STRATEGY.TRENDING; // Average score
+    }
+
     async findTrending() {
         try {
-            // Example logic: Find the most recent 10 ads
-            return await AdModel.find().sort({ createdAt: -1 }).limit(10).exec();
+            const adList = await AdModel.find({}).sort({ createdAt: -1 }).limit(10).exec();
+
+            const adsWithScores = [];
+            for (const ad of adList) {
+                const score = await this.calculateAdsScore(ad);
+                adsWithScores.push({
+                    ...ad.toObject(),
+                    score
+                });
+                console.log(score);
+            }
+
+            // Sort ads by score in descending order
+            adsWithScores.sort((a, b) => b.score - a.score);
+
+            return adsWithScores;
         } catch (error) {
-            console.error('Error finding trending ads:', error.message);
+            console.error(ERRORS_ADS_REPOSITORY.TRENDING_ADS, error.message);
             throw error;
         }
     }

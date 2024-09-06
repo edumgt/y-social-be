@@ -1,16 +1,16 @@
 const express = require('express');
-const { validateAdCreation, validateAdUpdate, adAuthorization, validateBudget } = require('../middleware/ads.middleware');
+const { validateAdCreation, validateAdUpdate, adAuthorization, validateBudget, validateAds } = require('../middleware/ads.middleware');
 const { adsController } = require('../controllers/ads.controller');
 
 const router = express.Router();
 
+router.put('/update/:id', validateAds, validateAdUpdate, adAuthorization, validateBudget, adsController.updateAd);
 router.post('/create', validateAdCreation, adsController.createAd);
-router.put('/update/:id', validateAdUpdate, adAuthorization, validateBudget, adsController.updateAd);
-router.delete('/delete/:id', adAuthorization, adsController.deleteAd);
-router.get('/get-all', adsController.getAllAds);
-router.get('/:id', adsController.getAdById);
-router.get('/user/:userId', adsController.getAdByUser);
-router.delete('/user/:userId', adsController.deleteAllAdByUser);
+router.get('/user/:userId', validateAds, adsController.getAdByUser);
 router.get('/trending', adsController.getAdByTrend);
+router.get('/get-all', adsController.getAllAds);
+router.get('/:id', validateAds, adsController.getAdById);
+router.delete('/delete-all/user/:userId', adsController.deleteAllAdByUser);
+router.delete('/delete/:id/user/:userId', validateAds, adAuthorization, adsController.deleteAd);
 
 module.exports = router;

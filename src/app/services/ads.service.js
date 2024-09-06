@@ -1,6 +1,9 @@
+const { ERRORS } = require("../constants/error");
 const { adsRepository } = require("../repositories/ads.repository");
+const { ERROR_ADS_SERVICE } = require("./constants/error");
+const { IAdsService } = require("./interfaces/ads.interface");
 
-class AdsService {
+class AdsService extends IAdsService {
     async addDailyAnalytics(adId, date, impressions, clicks, conversions) {
         const ad = await adsRepository.findById(adId);
         if (!ad) {
@@ -15,17 +18,11 @@ class AdsService {
         });
 
         await ad.save();
-        return ad; // Optional: return the updated ad
+        return ad;
     }
 
     async createAd(data) {
         try {
-            if (data.budget < 0) {
-                throw new Error('Budget must be a positive number');
-            }
-
-            const MIN_BUDGET = 30000;
-
             return await adsRepository.create(data);
         } catch (error) {
             console.error('Error creating ad:', error.message);
@@ -33,17 +30,16 @@ class AdsService {
         }
     }
 
-    // Get an ad by ID
     async getAdById(id) {
         try {
             const ad = await adsRepository.findById(id);
             if (!ad) {
-                throw new Error('Ad not found');
+                throw new Error(ERRORS.NOT_FOUND);
             }
             return ad;
         } catch (error) {
             console.error('Error fetching ad:', error.message);
-            throw error; // Propagate the error to be caught by the controller
+            throw error;
         }
     }
 
@@ -51,7 +47,7 @@ class AdsService {
         try {
             const updatedAd = await adsRepository.update(id, data);
             if (!updatedAd) {
-                throw new Error('Ad not found');
+                throw new Error(ERRORS.NOT_FOUND);
             }
             return updatedAd;
         } catch (error) {
@@ -70,61 +66,57 @@ class AdsService {
             return { message: 'Ad deleted successfully' };
         } catch (error) {
             console.error('Error deleting ad:', error.message);
-            throw error; // Propagate the error to be caught by the controller
+            throw error;
         }
     }
 
-    // Get all ads
     async getAllAds() {
         try {
             return await adsRepository.findAll();
         } catch (error) {
             console.error('Error fetching all ads:', error.message);
-            throw error; // Propagate the error to be caught by the controller
+            throw error;
         }
     }
 
-    // Get all ads by a specific user
     async getAdByUser(userId) {
         try {
             const ads = await adsRepository.findByUser(userId);
             if (!ads.length) {
-                throw new Error('No ads found for this user');
+                throw new Error(ERRORS.NOT_FOUND);
             }
             return ads;
         } catch (error) {
             console.error('Error fetching ads for user:', error.message);
-            throw error; // Propagate the error to be caught by the controller
+            throw error;
         }
     }
 
-    // Delete all ads by a specific user
     async deleteAllAdByUser(userId) {
         try {
             const ads = await adsRepository.findByUser(userId);
             if (!ads.length) {
-                throw new Error('No ads found for this user');
+                return { message: `No Ads Found` }
             }
-            await adsRepository.deleteAllByUser(userId);
-            return { message: 'All ads for the user deleted successfully' };
+
+            const result = await adsRepository.deleteAllByUser(userId);
+            return { message: 'All ads deleted successfully', count: result.deletedCount };
         } catch (error) {
             console.error('Error deleting ads for user:', error.message);
-            throw error; // Propagate the error to be caught by the controller
+            throw new Error(ERRORS.DEFAULT);
         }
     }
 
-    // Get trending ads
     async getAdByTrend() {
         try {
-            // Example of additional business logic (e.g., determining what qualifies as trending)
             return await adsRepository.findTrending();
         } catch (error) {
-            console.error('Error fetching trending ads:', error.message);
-            throw error; // Propagate the error to be caught by the controller
+            console.error(ERROR_ADS_SERVICE.TRENDING_ADS, error);
+            throw new Error(ERRORS.DEFAULT);
         }
     }
 }
 
-const adsService = new AdsService(adsRepository);
+const adsService = new AdsService();
 
 module.exports = { adsService };

@@ -1,3 +1,4 @@
+const { ERRORS } = require('../constants/error');
 const { CurrencyConverter } = require('../lib/convert');
 const { adsService } = require('../services/ads.service');
 const { handleRequest } = require('../utils/handle-request');
@@ -15,14 +16,13 @@ class AdsController {
                 adData.schedule_start = new Date();
             }
 
-            // Initialize result with today's date
-            adData.result = [{
+            const InitializeResult = [{
                 date: new Date(),
                 impressions: 0,
                 clicks: 0,
                 conversions: 0
-            }];
-
+            }]
+            adData.result = InitializeResult;
             return await adsService.createAd(adData);
         });
     }
@@ -42,7 +42,7 @@ class AdsController {
 
             const updatedAd = await adsService.updateAd(adId, updateData);
             if (!updatedAd) {
-                throw new Error('Something went wrong');
+                throw new Error(ERRORS.DEFAULT);
             }
             return updatedAd;
         });
@@ -53,7 +53,7 @@ class AdsController {
             const adId = req.params.id;
             const result = await adsService.deleteAd(adId);
             if (result.error) {
-                throw new Error('Ad not found');
+                throw new Error(ERRORS.NOT_FOUND);
             }
             return { message: 'Ad deleted successfully' };
         });
@@ -70,7 +70,7 @@ class AdsController {
             const adId = req.params.id;
             const ad = await adsService.getAdById(adId);
             if (!ad) {
-                throw new Error('Ad not found');
+                throw new Error(ERRORS.NOT_FOUND);
             }
             return ad;
         });
@@ -81,7 +81,7 @@ class AdsController {
             const userId = req.params.userId;
             const ads = await adsService.getAdByUser(userId);
             if (!ads.length) {
-                throw new Error('No ads found for this user');
+                throw new Error(ERRORS.NOT_FOUND);
             }
             return ads;
         });
@@ -90,8 +90,7 @@ class AdsController {
     async deleteAllAdByUser(req, res) {
         await handleRequest(req, res, async () => {
             const userId = req.params.userId;
-            await adsService.deleteAllAdByUser(userId);
-            return { message: 'All ads for the user deleted successfully' };
+            return await adsService.deleteAllAdByUser(userId);
         });
     }
 
@@ -105,3 +104,4 @@ class AdsController {
 const adsController = new AdsController();
 
 module.exports = { adsController };
+

@@ -4,6 +4,15 @@ const adModel = require('../models/ads.model');
 const { MIN_BUDGET } = require('../constants/ads');
 const { ERRORS } = require('../constants/error');
 
+const validateAds = async (req, res, next) => {
+    const adId = req.params.id;
+    const ad = await adsService.getAdById(adId);
+    if (!ad) {
+        return res.status(404).json({ error: ERRORS.NOT_FOUND });
+    }
+    next();
+}
+
 const validateAdCreation = [
     body('title').isString().trim().withMessage('Title is required'),
     body('description').isString().trim().withMessage('Description is required'),
@@ -44,7 +53,7 @@ const validateAdUpdate = [
 
         const isAdExisted = adModel.findById(req.params.id);
         if (!isAdExisted) {
-            return res.status(400).json({ errors: "This ad not existed" });
+            return res.status(400).json({ errors: ERRORS.NOT_FOUND });
         }
 
         next();
@@ -54,11 +63,15 @@ const validateAdUpdate = [
 const validateBudget = async (req, res, next) => {
     try {
         const adId = req.params.id;
-        const updateData = req.body;
+        const { budget } = req.body
         const ad = await adsService.getAdById(adId);
         const minBudget = MIN_BUDGET[ad.currency];
 
-        if (minBudget !== undefined && updateData.budget < minBudget) {
+        if (budget < 0) {
+            throw new Error(ERRORS.BUDGET_POSITIVE);
+        }
+
+        if (minBudget !== undefined && budget < minBudget) {
             return res.status(400).json({
                 errors: `Budget must be at least ${minBudget} ${ad.currency}`
             });
@@ -71,7 +84,7 @@ const validateBudget = async (req, res, next) => {
 };
 
 const adAuthorization = async (req, res, next) => {
-    const { userId } = req.body
+    const userId = req.params.userId
     const adId = req.params.id;
 
     if (!userId || !adId) {
@@ -80,12 +93,8 @@ const adAuthorization = async (req, res, next) => {
 
     try {
         const ad = await adsService.getAdById(adId);
-        if (!ad) {
-            return res.status(404).json({ error: ERRORS.NOT_FOUND });
-        }
-
         if (ad.userID !== userId) {
-            return res.status(403).json({ error: 'User does not have permission to modify this ad' });
+            return res.status(403).json({ error: ERRORS.NOT_ALLOWED });
         }
 
         next();
@@ -94,4 +103,4 @@ const adAuthorization = async (req, res, next) => {
     }
 };
 
-module.exports = { validateAdCreation, validateAdUpdate, validateBudget, adAuthorization };
+module.exports = { validateAds, validateAdCreation, validateAdUpdate, validateBudget, adAuthorization };

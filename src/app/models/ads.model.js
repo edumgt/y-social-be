@@ -18,6 +18,10 @@ const dailyAdAnalyticsSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        cost: {
+            type: Number,
+            default: 0,
+        }
     },
     { _id: false }
 );
@@ -106,7 +110,12 @@ const adsSchema = new mongoose.Schema(
         adTargetAudience: {
             type: targetAudienceSchema,
         },
-        result: [dailyAdAnalyticsSchema]
+        result: [dailyAdAnalyticsSchema],
+        score: {
+            type: Number,
+            required: true,
+            default: 0
+        }
     },
     { timestamps: true }
 );
