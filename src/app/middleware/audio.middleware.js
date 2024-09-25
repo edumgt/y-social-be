@@ -20,7 +20,7 @@ class AudioMiddleware {
       console.error("Failed to validate audio ID", error);
 
       return res.status(500).json({
-        msg: `An error occured while validate audio ID`,
+        msg: `An error occurred while validate audio ID`,
       });
     }
   };
