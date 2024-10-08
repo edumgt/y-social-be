@@ -6,10 +6,19 @@ const { handleRequest } = require('../utils/handle-request');
 class AdsController {
     async createAd(req, res) {
         await handleRequest(req, res, async () => {
+            const { schedule_start, ...body } = req.body;
+
+            // Initialize adData
             const adData = {
                 userID: req.userId,
-                ...req.body
+                ...body,
+                schedule_start: schedule_start ? new Date(schedule_start) : new Date(),
             };
+
+            // Compare schedule_start with the current date
+            if (adData.schedule_start < new Date()) {
+                adData.status = 'schedule';
+            }
 
             // Set schedule_start to today's date if not provided
             if (!adData.schedule_start) {

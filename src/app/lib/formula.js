@@ -16,7 +16,7 @@ const AdModel = require("../models/ads.model");
 
 class Formula extends IFormula {
     calculateCTR(clicks, impressions) {
-        return impressions ? (clicks / impressions) * 100 : 0;
+        return impressions ? ((clicks / impressions) * 100).toFixed(2) : 0;
     }
 
     async calculateTotalCost(adId) {

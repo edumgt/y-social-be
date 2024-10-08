@@ -1,3 +1,4 @@
+const { formula } = require("../lib/formula");
 const { adsAnalyticsRepository } = require("../repositories/ads-analytics.repository")
 
 class AdsAnalyticsService {
@@ -10,12 +11,14 @@ class AdsAnalyticsService {
                 const impressions = this.calculateImpressions();
                 const clicks = this.calculateClicks();
                 const conversions = this.calculateConversions();
+                const ctr = formula.calculateCTR(clicks, impressions);
 
                 ad.result.push({
                     date: today,
                     impressions,
                     clicks,
                     conversions,
+                    ctr
                 });
 
                 await ad.save();
