@@ -21,6 +21,10 @@ const dailyAdAnalyticsSchema = new mongoose.Schema(
         cost: {
             type: Number,
             default: 0,
+        },
+        ctr: {
+            type: Number,
+            default: 0,
         }
     },
     { _id: false }
@@ -28,10 +32,6 @@ const dailyAdAnalyticsSchema = new mongoose.Schema(
 
 const goalSchema = new mongoose.Schema(
     {
-        adID: {
-            type: String,
-            required: true,
-        },
         goalID: {
             type: String,
             required: true,
@@ -78,6 +78,7 @@ const adsSchema = new mongoose.Schema(
         },
         media_content: {
             type: String,
+            required: true,
         },
         budget: {
             type: Number,
@@ -100,8 +101,9 @@ const adsSchema = new mongoose.Schema(
             required: true,
         },
         status: {
-            type: Boolean,
-            default: false,
+            type: String,
+            enum : ['active','schedule','disabled'],
+            default: 'active',
         },
         goal: {
             type: goalSchema,

@@ -4,7 +4,7 @@ paths:
       tags:
         - Image
       responses:
-        '200':
+        "200":
           description: Hello from image :D
   /image/all-images/{userID}:
     description: Get all images of a user
@@ -16,13 +16,27 @@ paths:
           in: path
           required: true
       responses:
-        '200':
+        "200":
           description: Get all images of a user successfully
   /image/all-images:
     description: Get all images
     get:
       tags:
-        - Image      
+        - Image
       responses:
-        '200':
+        "200":
           description: Get all images successfully
+  /image/upload:
+    description: Uload Media
+    post:
+      tags:
+        - Image
+      requestBody:
+        content:
+          image/png/jpeg/jpg/gif:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "200":
+          description: Upload media successfully

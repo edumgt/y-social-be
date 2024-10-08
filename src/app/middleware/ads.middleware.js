@@ -91,16 +91,7 @@ const adAuthorization = async (req, res, next) => {
         return res.status(401).json({ error: ERRORS.AUTHORIZED });
     }
 
-    try {
-        const ad = await adsService.getAdById(adId);
-        if (ad.userID !== userId) {
-            return res.status(403).json({ error: ERRORS.NOT_ALLOWED });
-        }
-
-        next();
-    } catch (error) {
-        return res.status(500).json({ error: ERRORS.DEFAULT });
-    }
+    next();
 };
 
 module.exports = { validateAds, validateAdCreation, validateAdUpdate, validateBudget, adAuthorization };

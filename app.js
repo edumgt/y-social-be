@@ -12,7 +12,8 @@ const ApiError = require("./api.error");
 
 const allowedOrigins = [
   process.env.FRONTEND_URL,
-  process.env.ADMIN_URL
+  process.env.ADMIN_URL,
+  process.env.SWAGGER_URL,
 ];
 
 const corsOptions = {
