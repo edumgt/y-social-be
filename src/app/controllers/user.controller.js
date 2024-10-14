@@ -5,8 +5,24 @@ const UserModel = require("../models/user.model");
 const verifyOTP = require("../utils/sendOtp");
 const { userService } = require("../services/user.service");
 const hashedUtil = require("../utils/hashed.util");
+const PaymentModel = require("../models/payment.model")
 
 class UserController {
+  getAll = async (req, res) => {
+    const result = await userService.getAll();
+
+    if (result) {
+      return res.status(200).json({
+        msg: "Get all users successfully",
+        result,
+      })
+    }
+
+    return res.status(500).json({
+      msg: "Get all users failed",
+    });
+  };
+
   register = async (req, res, next) => {
     const { username, password, email } = req.body;
 

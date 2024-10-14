@@ -38,6 +38,15 @@ const blackList = new mongoose.Schema(
   { timestamps: true },
 );
 
+const payment = new mongoose.Schema(
+  {
+    paymentId: {
+      type: String,
+      required: true,
+    }
+  },
+)
+
 const User = new Schema(
   {
     username: {
@@ -130,9 +139,14 @@ const User = new Schema(
       type: String,
       default: "",
     },
+    balance: {
+      type: Number,
+      default: 0,
+    },
     postShared: [postShared],
     blackList: [blackList],
     postSaved: [postSaved],
+    paymentList: [payment],
     isVerifyEmail: { type: Boolean, default: false },
     isVerify: { type: Boolean, default: false },
   },

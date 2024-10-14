@@ -70,9 +70,9 @@ class AdsService extends IAdsService {
         }
     }
 
-    async getAllAds() {
+    async getAllAds(limit, skip) {
         try {
-            return await adsRepository.findAll();
+            return await adsRepository.findAll(limit, skip);
         } catch (error) {
             console.error('Error fetching all ads:', error.message);
             throw error;

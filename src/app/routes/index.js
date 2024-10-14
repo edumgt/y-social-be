@@ -19,7 +19,8 @@ const userRoute = require("./user.routes");
 const imgRoute = require("./image.routes");
 const audioRoute = require("./audio.routes");
 const otpRoute = require("./otp.routes");
-const adRoute = require("./ads.route")
+const adRoute = require("./ads.route");
+const paymentCasso = require("./payment-casso.route")
 
 router.use(PRIMARY_ROUTE + "block-list", blockListRoute);
 router.use(PRIMARY_ROUTE + "comment", commentRoute);
@@ -33,6 +34,7 @@ router.use(PRIMARY_ROUTE + "image", imgRoute);
 router.use(PRIMARY_ROUTE + "audio", audioRoute);
 router.use(PRIMARY_ROUTE + "otp", otpRoute);
 router.use(PRIMARY_ROUTE + "ads", adRoute);
+router.use(PRIMARY_ROUTE + "payment-casso", paymentCasso)
 router.use(PRIMARY_ROUTE + "swagger", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 
 module.exports = router;

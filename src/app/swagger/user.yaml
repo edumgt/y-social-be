@@ -4,7 +4,7 @@ paths:
       tags:
         - User
       responses:
-        '200':
+        "200":
           description: Hello from user :D
   /user/all-users:
     get:
@@ -19,7 +19,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: List of users
   /user/{userID}:
     get:
@@ -34,7 +34,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Details of the user
   /user/{userID}/shared:
     get:
@@ -49,7 +49,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Posts shared by the user
   /user/{userID}/saved:
     get:
@@ -64,7 +64,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Posts saved by the user
   /user/{userID}/quantity/image:
     get:
@@ -79,7 +79,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Quantity of images uploaded by the user
   /user/{userID}/quantity/audio:
     get:
@@ -94,7 +94,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Quantity of audios uploaded by the user
   /user/register:
     post:
@@ -115,7 +115,7 @@ paths:
                 email:
                   type: string
       responses:
-        '200':
+        "200":
           description: Registered user
   /user/login:
     post:
@@ -134,7 +134,7 @@ paths:
                 password:
                   type: string
       responses:
-        '200':
+        "200":
           description: Logged in user
   /user/reset-password:
     post:
@@ -151,8 +151,8 @@ paths:
                 email:
                   type: string
       responses:
-        '200':
-          description: Successfully   
+        "200":
+          description: Successfully
   /user/update/{userID}:
     put:
       description: Update a user
@@ -177,12 +177,12 @@ paths:
                 lastName:
                   type: string
       responses:
-        '200':
+        "200":
           description: User updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/##/models/UserModel'
+                $ref: "#/##/models/UserModel"
               example:
                 firstName: "yanji"
                 lastName: "social"
@@ -209,6 +209,5 @@ paths:
           schema:
             type: string
       responses:
-        '200':
-          description: User deleted successfully          
-
+        "200":
+          description: User deleted successfully

@@ -1,0 +1,8 @@
+paths:
+  /payment-casso:
+    get:
+      tags:
+        - Payment
+      responses:
+        '200':
+          description: Get all payment list
