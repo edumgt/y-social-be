@@ -7,9 +7,7 @@ const { userController } = require("../controllers/user.controller");
 const { imageController } = require("../controllers/image.controller");
 const { audioController } = require("../controllers/audio.controller");
 
-router.get("/", (req, res) => {
-  res.send({ msg: "Hello from user :D" });
-});
+router.get("/", userController.getAll);
 router.get("/username/:username", userController.getByUsername);
 router.get("/all-users", userController.getAllUsersByUsername);
 router.get("/:userID", userMiddleware.validateUserById, userController.getUser);

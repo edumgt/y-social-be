@@ -2,23 +2,21 @@ require("dotenv").config();
 
 const MongoDB = require("./src/app/utils/mongodb.utils");
 const socket = require("./socket");
+const ColorConsole = require("./src/app/lib/color-console");
 
 const startServer = async () => {
   try {
     await MongoDB.connect(process.env.MONGODB_URI);
-    console.log("Connected to db :D");
+    ColorConsole("success", "Connected to database successfully :)");
 
     const SOCKET_PORT = process.env.SOCKET_PORT;
 
     socket.listen(SOCKET_PORT, () => {
-      console.log("Socket connected successfully on port", SOCKET_PORT);
-      console.log(
-        "Swagger is running on",
-        `http://localhost:${SOCKET_PORT}/api/v1/swagger`,
-      );
+      ColorConsole("success", `Socket connected successfully on port ${SOCKET_PORT}`);
+      ColorConsole("success", `Swagger is running on: "http://localhost:${SOCKET_PORT}/api/v1/swagger"`);
     });
   } catch (error) {
-    console.error("Cannot connect to db :<", error);
+    ColorConsole("error", `Cannot connect to db :< ${error}`);
     process.exit(1);
   }
 };

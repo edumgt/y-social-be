@@ -42,8 +42,11 @@ class AdsRepository extends IAds {
         }
     }
 
-    async findAll() {
+    async findAll(limit, skip) {
         try {
+            if(limit || skip) {
+                return await AdModel.find().limit(limit).skip(skip).exec();
+            }
             return await AdModel.find().exec();
         } catch (error) {
             console.error('Error finding all ads:', error.message);

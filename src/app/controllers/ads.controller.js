@@ -70,7 +70,9 @@ class AdsController {
 
     async getAllAds(req, res) {
         await handleRequest(req, res, async () => {
-            return await adsService.getAllAds();
+            const { limit, skip } = req.query;
+
+            return await adsService.getAllAds(limit, skip);
         });
     }
 
