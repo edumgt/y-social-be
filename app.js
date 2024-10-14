@@ -5,7 +5,7 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 require("dotenv").config();
 const app = express();
-require('./src/app/lib/scheduler');
+require('./src/app/lib/scheduler-update-advertise-anaylytics');
 require("./src/app/lib/scheduler-sync-new-payment")
 
 const router = require("./src/app/routes/index");

@@ -1,7 +1,10 @@
 // example usage
 
+const { ERRORS } = require("../constants/error");
 const { IFormula } = require("../interfaces/formula.interface");
 const AdModel = require("../models/ads.model");
+const { adsService } = require("../services/ads.service");
+const ColorConsole = require("./color-console")
 
 // const clicks = 500;
 // const impressions = 10000;
@@ -21,15 +24,24 @@ class Formula extends IFormula {
 
     async calculateTotalCost(adId) {
         try {
-            const ad = await AdModel.findById(adId).exec();
+            const ad = await adsService.getAdById(adId);
             if (!ad) {
                 throw new Error('Ad not found');
             }
-            return ad.result.reduce((sum, analytics) => sum + (analytics.cost || 0), 0);
+            const result = ad.result.reduce((sum, analytics) => {
+                const cost = Number(analytics.cost); 
+                return sum + (isNaN(cost) ? 0 : cost);
+            }, 0);
+
+            return result;
         } catch (error) {
-            console.error('Error calculating total cost:', error.message);
+            ColorConsole.error('Error calculating total cost: ', error.message);
             throw error;
         }
+    }
+
+    async calculateCost() {
+        
     }
 
     calculateConversionRate(conversions, clicks) {

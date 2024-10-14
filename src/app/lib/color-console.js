@@ -20,4 +20,8 @@ const ColorConsole = (type, message) => {
     console.log(badge(`[ ${type.toUpperCase()} ]:`), text(message));
 };
 
+ColorConsole.error = (message) => ColorConsole('error', message);
+ColorConsole.info = (message) => ColorConsole('info', message);
+ColorConsole.success = (message) => ColorConsole('success', message);
+
 module.exports = ColorConsole;
