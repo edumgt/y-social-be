@@ -10,7 +10,7 @@ class PaymentCassoRepository extends IPaymentCasso {
         try {
             return await PaymentModel.find();
         } catch (error) {
-            console.error('Error getting all payments:', error.message);
+            console.error('Error getting all payments: ', error.message);
             throw error;
         }
     }
@@ -40,6 +40,8 @@ class PaymentCassoRepository extends IPaymentCasso {
     async handleUserPaid(paymentList) {
         try {
             paymentList.map(async (payment) => {
+                // This collumn is specific by Casso Auto Bot
+                // Visit: https://www.casso.vn/ to learn more
                 const {
                     "Ngày diễn ra": when,
                     "Số tài khoản": bankSubAccId,
