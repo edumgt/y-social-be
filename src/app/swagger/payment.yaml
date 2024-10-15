@@ -4,5 +4,5 @@ paths:
       tags:
         - Payment
       responses:
-        '200':
+        "200":
           description: Get all payment list

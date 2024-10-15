@@ -8,7 +8,10 @@
     "dev": "nodemon index.js",
     "build": "npm i",
     "lint": "eslint --ignore-pattern .gitignore .",
-    "format": "prettier --write \"**/*.{js,jsx,tsx,ts,json,md,html,css,less,scss}\""
+    "lint:fix": "npm run lint -- --fix",
+    "prettier": "npx prettier src --check",
+    "prettier:fix": "npm run prettier -- --write",
+    "format": "npm run prettier:fix && npm run lint:fix"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +20,7 @@
     "@eslint/js": "^9.12.0",
     "cross-env": "^7.0.3",
     "eslint": "^9.12.0",
+    "eslint-config-prettier": "^9.1.0",
     "globals": "^15.11.0",
     "nodemon": "^2.0.20",
     "prettier": "^3.1.1",
@@ -34,7 +38,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "express-rate-limit": "^7.4.0",
+    "express-rate-limit": "^7.4.1",
     "express-validator": "^7.2.0",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",

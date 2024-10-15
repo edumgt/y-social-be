@@ -1,16 +1,16 @@
 paths:
   /notification/{notiID}:
-      get:
-        description: Get notification by ID
-        tags:
-          - Notification
-        parameters:
-          - name: notiID
-            in: path
-            required: true
-        responses:
-          '200':
-            description: Get notification by ID successfully
+    get:
+      description: Get notification by ID
+      tags:
+        - Notification
+      parameters:
+        - name: notiID
+          in: path
+          required: true
+      responses:
+        "200":
+          description: Get notification by ID successfully
   /notification/all/user/{userID}:
     get:
       description: Returns all notifications for a specific user
@@ -38,7 +38,7 @@ paths:
           schema:
             type: number
       responses:
-        '200':
+        "200":
           description: Get all notifications successfully
   /notification/new:
     post:
@@ -59,7 +59,7 @@ paths:
                 type:
                   type: number
       responses:
-        '200':
+        "200":
           description: Create new notification successfully
           content:
             application/json:
@@ -76,35 +76,35 @@ paths:
                   createdAt: "2024-01-05T14:58:44.442Z"
                   updatedAt: "2024-01-05T14:58:44.442Z"
   /notification/mark-seen/{notiID}:
-      put:
-        description: Mark seen notification
-        tags:
-          - Notification
-        parameters:
-          - name: notiID
-            in: path
-            required: true
-        requestBody:
+    put:
+      description: Mark seen notification
+      tags:
+        - Notification
+      parameters:
+        - name: notiID
+          in: path
           required: true
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  isRead:
-                    type: boolean
-        responses:
-          '200':
-            description: Mark seen notification successfully
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isRead:
+                  type: boolean
+      responses:
+        "200":
+          description: Mark seen notification successfully
   /notification/delete/{notiID}:
-      delete:
-        description: Delete notification
-        tags:
-          - Notification
-        parameters:
-          - name: notiID
-            in: path
-            required: true
-        responses:
-          '200':
-            description: Delete notification successfully
+    delete:
+      description: Delete notification
+      tags:
+        - Notification
+      parameters:
+        - name: notiID
+          in: path
+          required: true
+      responses:
+        "200":
+          description: Delete notification successfully

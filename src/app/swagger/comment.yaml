@@ -4,7 +4,7 @@ paths:
       tags:
         - Comment
       responses:
-        '200':
+        "200":
           description: Hello from comment :D
   /comment/all-comments:
     description: Get all comments
@@ -12,7 +12,7 @@ paths:
       tags:
         - Comment
       responses:
-        '200':
+        "200":
           description: Get all comments successfully
   /comment/get-comment/{commentID}:
     description: Get comment by id
@@ -24,7 +24,7 @@ paths:
           in: path
           required: true
       responses:
-        '200':
+        "200":
           description: Get comment successfully
   /comment/all-comments/post/{postID}:
     description: Get all comments by post
@@ -36,7 +36,7 @@ paths:
           in: path
           required: true
       responses:
-        '200':
+        "200":
           description: Get all comments successfully
   /comment/update-comment/{commentID}:
     description: Update comment
@@ -57,7 +57,7 @@ paths:
                 content:
                   type: string
       responses:
-        '200':
+        "200":
           description: Update comment successfully
   /comment/delete-comment/{commentID}:
     description: Delete comment
@@ -69,5 +69,5 @@ paths:
           in: path
           required: true
       responses:
-        '200':
+        "200":
           description: Delete comment successfully

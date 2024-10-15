@@ -95,7 +95,7 @@ components:
         id:
           type: string
         user:
-          type: 
+          type:
         contactName:
           type: string
         profilePicture:

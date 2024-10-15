@@ -26,7 +26,11 @@ class AdsRepository extends IAds {
 
   async update(id, adData) {
     try {
-      return await AdModel.findByIdAndUpdate(id, adData, { new: true }).exec();
+      return await AdModel.findByIdAndUpdate(
+        id,
+        { $set: adData },
+        { new: true },
+      ).exec();
     } catch (error) {
       console.error("Error updating ad:", error.message);
       throw error;
