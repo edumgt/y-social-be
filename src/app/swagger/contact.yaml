@@ -4,5 +4,5 @@ paths:
       tags:
         - Contact
       responses:
-        '200':
+        "200":
           description: Hello from contact :D

@@ -10,7 +10,7 @@ const isValidUser = async (userID) => {
 };
 
 class AudioController {
-  getAllAudiosByUserID = async (req, res, next) => {
+  getAllAudiosByUserID = async (req, res) => {
     const userID = req.params.userID;
 
     try {
@@ -31,7 +31,7 @@ class AudioController {
     }
   };
 
-  getAudioByID = async (req, res, next) => {
+  getAudioByID = async (req, res) => {
     const audioID = req.params.audioID;
 
     try {
@@ -44,12 +44,12 @@ class AudioController {
       console.error(`Failed to get audio ${audioID}`);
 
       return res.status(500).json({
-        msg: `Failed to get audio ${audioID}`,
+        msg: `Failed to get audio ${audioID}: ${error}`,
       });
     }
   };
 
-  uploadAudioByUserID = async (req, res, next) => {
+  uploadAudioByUserID = async (req, res) => {
     const { audioUrl, userID, cover, name } = req.body;
 
     isValidUser(userID)
@@ -77,7 +77,7 @@ class AudioController {
       });
   };
 
-  updateAudioByUserID = async (req, res, next) => {
+  updateAudioByUserID = async (req, res) => {
     const audioID = req.params.audioID;
 
     try {
@@ -102,7 +102,7 @@ class AudioController {
     }
   };
 
-  deleteAllAudiosByUserID = async (req, res, next) => {
+  deleteAllAudiosByUserID = async (req, res) => {
     const userID = req.params.userID;
     try {
       const result = await AudioModel.deleteMany({ userID });
@@ -117,12 +117,12 @@ class AudioController {
       );
 
       return res.status(500).json({
-        msg: `Failed to delete all audios of user ${userID}`,
+        msg: `Failed to delete all audios of user ${userID}: ${error}`,
       });
     }
   };
 
-  deleteAudioByID = async (req, res, next) => {
+  deleteAudioByID = async (req, res) => {
     const audioID = req.params.audioID;
 
     try {
@@ -138,12 +138,12 @@ class AudioController {
     } catch (error) {
       console.error(`Failed to delete audio ${audioID}`);
       return res.status(500).json({
-        msg: `Failed to delete audio ${audioID}`,
+        msg: `Failed to delete audio ${audioID}: ${error}`,
       });
     }
   };
 
-  fetchUserSpecificAudioQuantity = async (req, res, next) => {
+  fetchUserSpecificAudioQuantity = async (req, res) => {
     const userID = req.params.userID;
     const limit = req.query.limit;
 
@@ -155,7 +155,7 @@ class AudioController {
       });
     } catch (error) {
       return res.status(500).json({
-        msg: `Failed to get audio of user ${userID}`,
+        msg: `Failed to get audio of user ${userID}: ${error}`,
       });
     }
   };

@@ -7,7 +7,7 @@ const { userRepository } = require("../repositories/user.repository");
 class UserService {
   getAll = async () => {
     return await userRepository.getAll();
-  }
+  };
 
   createUser = async (username, password, email) => {
     const hashedPassword = await hashedUtil.saltHash(password);

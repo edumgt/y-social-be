@@ -1,41 +1,43 @@
-const { default: axios } = require('axios');
-const { GG_APP_SCRIPT_API_KEY } = require('../constants/payment');
-const { IPaymentCasso } = require('./interfaces/payment-casso.interface');
-const { extractUserIdFromTransaction } = require('../lib/extract-user-id-from-transaction');
-const { userService } = require('../services/user.service');
+const { default: axios } = require("axios");
+const { GG_APP_SCRIPT_API_KEY } = require("../constants/payment");
+const { IPaymentCasso } = require("./interfaces/payment-casso.interface");
+const {
+  extractUserIdFromTransaction,
+} = require("../lib/extract-user-id-from-transaction");
+const { userService } = require("../services/user.service");
 const PaymentModel = require("../models/payment.model");
 
 class PaymentCassoRepository extends IPaymentCasso {
-    async getAll() {
-        try {
-            return await PaymentModel.find();
-        } catch (error) {
-            console.error('Error getting all payments: ', error.message);
-            throw error;
-        }
+  async getAll() {
+    try {
+      return await PaymentModel.find();
+    } catch (error) {
+      console.error("Error getting all payments:", error.message);
+      throw error;
     }
+  }
 
-    async createPayment(data) {
-        try {
-            const payment = new PaymentModel(data);
-            return await payment.save();
-        } catch (error) {
-            console.error('Error creating new payment:', error.message);
-            throw error;
-        }
+  async createPayment(data) {
+    try {
+      const payment = new PaymentModel(data);
+      return await payment.save();
+    } catch (error) {
+      console.error("Error creating new payment:", error.message);
+      throw error;
     }
+  }
 
-    async handlerBankTransfer() {
-        try {
-            const result = await axios.get(GG_APP_SCRIPT_API_KEY)
-            const { data } = result;
-            const paymentList = data.data;
-            return paymentList;
-        } catch (error) {
-            console.error('Error sync new transaction:', error.message);
-            throw error;
-        }
+  async handlerBankTransfer() {
+    try {
+      const result = await axios.get(GG_APP_SCRIPT_API_KEY);
+      const { data } = result;
+      const paymentList = data.data;
+      return paymentList;
+    } catch (error) {
+      console.error("Error sync new transaction:", error.message);
+      throw error;
     }
+  }
 
     async handleUserPaid(paymentList) {
         try {

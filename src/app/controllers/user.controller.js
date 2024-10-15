@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
+const ColorConsole = require("../lib/color-console");
 require("dotenv").config();
 
 const UserModel = require("../models/user.model");
 const verifyOTP = require("../utils/sendOtp");
 const { userService } = require("../services/user.service");
 const hashedUtil = require("../utils/hashed.util");
-const PaymentModel = require("../models/payment.model")
 
 class UserController {
   getAll = async (req, res) => {
@@ -15,7 +15,7 @@ class UserController {
       return res.status(200).json({
         msg: "Get all users successfully",
         result,
-      })
+      });
     }
 
     return res.status(500).json({
@@ -23,7 +23,7 @@ class UserController {
     });
   };
 
-  register = async (req, res, next) => {
+  register = async (req, res) => {
     const { username, password, email } = req.body;
 
     verifyOTP.withEmail(email).then(async (code) => {
@@ -42,7 +42,7 @@ class UserController {
     });
   };
 
-  login = async (req, res, next) => {
+  login = async (req, res) => {
     const { username, password } = req.body;
     const user = await userService.findUserByUsername(username);
 
@@ -66,7 +66,7 @@ class UserController {
     });
   };
 
-  getByUsername = async (req, res, next) => {
+  getByUsername = async (req, res) => {
     const { username } = req.params;
     const user = await userService.findUserByUsername(username);
 
@@ -83,18 +83,18 @@ class UserController {
     });
   };
 
-  getAllUsersByUsername = async (req, res, next) => {
+  getAllUsersByUsername = async (req, res) => {
     try {
       const { username, limit, skip } = req.query;
-      const allUsers = await UserModel.find({}).sort({ createdAt: -1 })
+      const allUsers = await UserModel.find({}).sort({ createdAt: -1 });
 
       if (limit || skip) {
         const users =
           limit || skip
             ? await UserModel.find({})
-              .sort({ createdAt: -1 })
-              .limit(limit)
-              .skip(skip)
+                .sort({ createdAt: -1 })
+                .limit(limit)
+                .skip(skip)
             : allUsers;
 
         return res.status(200).json({
@@ -106,7 +106,9 @@ class UserController {
 
       if (username) {
         // Split the username into an array of words
-        const words = username.split(/\s+/).filter((word) => word.trim() !== "");
+        const words = username
+          .split(/\s+/)
+          .filter((word) => word.trim() !== "");
 
         // Create an array of regular expressions to match each word
         const regexQueries = words.map((word) => new RegExp(word, "i"));
@@ -141,7 +143,7 @@ class UserController {
     }
   };
 
-  getUser = async (req, res, next) => {
+  getUser = async (req, res) => {
     const userID = req.params.userID;
     const user = await UserModel.findById(userID);
 
@@ -166,7 +168,7 @@ class UserController {
     }
   };
 
-  updateUser = async (req, res, next) => {
+  updateUser = async (req, res) => {
     const userID = req.params.userID;
     try {
       const {
@@ -353,7 +355,7 @@ class UserController {
     }
   };
 
-  followUser = async (req, res, next) => {
+  followUser = async (req, res) => {
     const userID = req.params.userID;
     const user = await UserModel.findById(userID);
     const { newFollower } = req.body;
@@ -445,7 +447,7 @@ class UserController {
     }
   };
 
-  deleteUser = async (req, res, next) => {
+  deleteUser = async (req, res) => {
     const userID = req.params.userID;
     try {
       await UserModel.findByIdAndDelete(userID);
@@ -454,14 +456,14 @@ class UserController {
         msg: `Deleted user ${userID} successfully`,
       });
     } catch (error) {
-      console.log("[DELETE_USER]", error)
+      console.log("[DELETE_USER]", error);
       return res.status(500).json({
         msg: `Failed to delete user ${userID}`,
       });
     }
   };
 
-  deleteAllUsers = async (req, res, next) => {
+  deleteAllUsers = async (req, res) => {
     try {
       const result = await UserModel.deleteMany({});
 
@@ -470,9 +472,9 @@ class UserController {
         count: result.deletedCount,
       });
     } catch (error) {
-      console.error("An error occured while deleting all users");
+      ColorConsole.error("An error occured while deleting all users");
       return res.status(500).json({
-        msg: "An error occured while deleting all users",
+        msg: `An error occured while deleting all users: ${error}`,
       });
     }
   };

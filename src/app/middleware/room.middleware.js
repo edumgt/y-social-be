@@ -1,3 +1,4 @@
+const ColorConsole = require("../lib/color-console");
 const Room = require("../models/room.model");
 
 const validateRoomID = async (req, res, next) => {
@@ -109,9 +110,9 @@ const validateIsParticipant = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error(`Failed to validate user ${userID}`);
+    ColorConsole.error(`Failed to validate user ${userID}`);
     return res.status(500).json({
-      msg: "Failed to validate is participant",
+      message: `Failed to validate is participant: ${error}`,
     });
   }
 };
