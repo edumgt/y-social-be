@@ -39,50 +39,52 @@ class PaymentCassoRepository extends IPaymentCasso {
     }
   }
 
-  async handleUserPaid(paymentList) {
-    try {
-      paymentList.map(async (payment) => {
-        const {
-          "Ngày diễn ra": when,
-          "Số tài khoản": bankSubAccId,
-          "Giá trị": amount,
-          "Mã GD": transactionId,
-          "Mô tả": description,
-        } = payment;
+    async handleUserPaid(paymentList) {
+        try {
+            paymentList.map(async (payment) => {
+                // This collumn is specific by Casso Auto Bot
+                // Visit: https://www.casso.vn/ to learn more
+                const {
+                    "Ngày diễn ra": when,
+                    "Số tài khoản": bankSubAccId,
+                    "Giá trị": amount,
+                    "Mã GD": transactionId,
+                    "Mô tả": description,
+                } = payment;
 
-        const userID = extractUserIdFromTransaction(description);
-        const checkPaymentIsExisting = await PaymentModel.findOne({
-          transactionId,
-        });
+                const userID = extractUserIdFromTransaction(description)
+                const checkPaymentIsExisting = await PaymentModel.findOne({
+                    transactionId,
+                });
 
-        if (userID && !checkPaymentIsExisting) {
-          const user = await userService.findUserById(userID);
+                if(userID && !checkPaymentIsExisting) {
+                    const user = await userService.findUserById(userID)
+                    
+                    if(user) {
+                        const result = await this.createPayment({
+                            userID,
+                            bankSubAccId,
+                            amount,
+                            transactionId,
+                            description,
+                            when,
+                        })
 
-          if (user) {
-            const result = await this.createPayment({
-              userID,
-              bankSubAccId,
-              amount,
-              transactionId,
-              description,
-              when,
-            });
+                        await userService.updateBalance(userID, result._id, amount)
 
-            await userService.updateBalance(userID, result._id, amount);
-
-            return result;
-          }
+                        return result;
+                    }
+                }
+            })
+        } catch (error) {
+            console.error('Error creating new user paid:', error.message);
+            throw error;
         }
-      });
-    } catch (error) {
-      console.error("Error creating new user paid:", error.message);
-      throw error;
     }
-  }
 
-  async handleUpdateBalance() {
-    return 1;
-  }
+    async handleUpdateBalance() {
+        return 1;
+    }
 }
 
 const paymentCassoRepository = new PaymentCassoRepository();
