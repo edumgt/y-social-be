@@ -88,9 +88,9 @@ class PostController {
       const posts =
         limit || skip
           ? await PostModel.find({})
-            .sort({ createdAt: -1 })
-            .limit(limit)
-            .skip(skip)
+              .sort({ createdAt: -1 })
+              .limit(limit)
+              .skip(skip)
           : allPosts;
 
       return res.status(200).json({
@@ -144,17 +144,17 @@ class PostController {
 
     if (content) {
       postList = await PostModel.find({
-        desc: { $regex: content, $options: 'i' }
+        desc: { $regex: content, $options: "i" },
       }).sort({ createdAt: -1 });
     } else {
       postList = await PostModel.find({}).sort({ createdAt: -1 });
     }
 
     return res.status(200).json({
-      msg: 'Get posts successfully',
-      data: postList
+      msg: "Get posts successfully",
+      data: postList,
     });
-  }
+  };
 
   getPostByID = async (req, res) => {
     const postID = req.params.postID;

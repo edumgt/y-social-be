@@ -1,7 +1,8 @@
+const ColorConsole = require("../lib/color-console");
 const RoomModel = require("../models/room.model");
 
 class RoomController {
-  createRoom = async (req, res, next) => {
+  createRoom = async (req, res) => {
     const { name, sender, receiver } = req.body;
 
     RoomModel.create({
@@ -30,7 +31,7 @@ class RoomController {
       });
   };
 
-  getRoomByID = async (req, res, next) => {
+  getRoomByID = async (req, res) => {
     const roomID = req.params.roomID;
     const room = await RoomModel.findById(roomID);
 
@@ -39,7 +40,7 @@ class RoomController {
     });
   };
 
-  getAllRooms = async (req, res, next) => {
+  getAllRooms = async (req, res) => {
     try {
       const rooms = await RoomModel.find({});
 
@@ -48,14 +49,14 @@ class RoomController {
         data: rooms,
       });
     } catch (error) {
-      console.error("Failed to get all rooms");
+      ColorConsole.error("Failed to get all rooms");
       return res.status(500).json({
-        msg: "Failed to get all rooms",
+        msg: `Failed to get all rooms: ${error}`,
       });
     }
   };
 
-  getRoomsByParticipant = async (req, res, next) => {
+  getRoomsByParticipant = async (req, res) => {
     const participantID = req.params.userID;
     const rooms = await RoomModel.find({
       participants: {
@@ -73,7 +74,7 @@ class RoomController {
     });
   };
 
-  joinRoom = async (req, res, next) => {
+  joinRoom = async (req, res) => {
     const roomID = req.params.roomID;
     const userID = req.params.userID;
 
@@ -94,7 +95,7 @@ class RoomController {
     }
   };
 
-  updateRoom = async (req, res, next) => {
+  updateRoom = async (req, res) => {
     try {
       const roomID = req.params.roomID;
       const { name, participants, settings } = req.body;
@@ -128,7 +129,7 @@ class RoomController {
     }
   };
 
-  deleteRoom = async (req, res, next) => {
+  deleteRoom = async (req, res) => {
     const roomID = req.params.roomID;
     try {
       await RoomModel.findByIdAndDelete(roomID);
@@ -144,7 +145,7 @@ class RoomController {
     }
   };
 
-  deleteAllRooms = async (req, res, next) => {
+  deleteAllRooms = async (req, res) => {
     const userID = req.params.userID;
 
     try {
@@ -165,7 +166,7 @@ class RoomController {
     }
   };
 
-  addParticipant = async (req, res, next) => {
+  addParticipant = async (req, res) => {
     const roomID = req.params.roomID;
     const userID = req.params.userID;
 
@@ -185,10 +186,10 @@ class RoomController {
     }
   };
 
-  removeParticipant = async (req, res, next) => {
+  removeParticipant = async (req, res) => {
     const roomID = req.params.roomID;
     const participantID = req.params.userID;
-    const room = await RoomModel.findById(roomID);
+    // const room = await RoomModel.findById(roomID);
 
     // if (room.isAdmin !== true) {
     //   console.error("You don't have permission to remove participant");

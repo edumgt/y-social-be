@@ -1,10 +1,11 @@
 require("dotenv").config();
+const ColorConsole = require("../lib/color-console");
 
 const VideoModel = require("../models/video.model");
 const { deleteOnCloudiary } = require("../utils/delete.cloudiary");
 
 class VideoController {
-  getAllVideosByUserID = async (req, res, next) => {
+  getAllVideosByUserID = async (req, res) => {
     const userID = req.params.userID;
 
     try {
@@ -25,7 +26,7 @@ class VideoController {
     }
   };
 
-  getVideoByID = async (req, res, next) => {
+  getVideoByID = async (req, res) => {
     const videoID = req.params.videoID;
 
     try {
@@ -35,10 +36,10 @@ class VideoController {
         data: result,
       });
     } catch (error) {
-      console.error(`Failed to get video ${videoID}`);
+      ColorConsole.error(`Failed to get video ${videoID}`);
 
       return res.status(500).json({
-        msg: `Failed to get video ${videoID}`,
+        msg: `Failed to get video ${videoID}: ${error}`,
       });
     }
   };
@@ -56,7 +57,7 @@ class VideoController {
       });
   };
 
-  updateVideoByUserID = async (req, res, next) => {
+  updateVideoByUserID = async (req, res) => {
     const videoID = req.params.videoID;
     const userID = req.params.userID;
 
@@ -73,15 +74,15 @@ class VideoController {
         data: updatedVideo,
       });
     } catch (error) {
-      console.error(`Failed to update video ${videoID}`);
+      ColorConsole.error(`Failed to update video ${videoID}`);
 
       return res.status(500).json({
-        msg: `Failed to update video`,
+        msg: `Failed to update video: ${error}`,
       });
     }
   };
 
-  deleteAllVideosByUserID = async (req, res, next) => {
+  deleteAllVideosByUserID = async (req, res) => {
     const userID = req.params.userID;
     try {
       const result = await VideoModel.deleteMany({ userID });
@@ -91,12 +92,12 @@ class VideoController {
         count: result.deletedCount,
       });
     } catch (error) {
-      console.error(
+      ColorConsole.error(
         `Failed to delete all videos of user ${userID} successfully`,
       );
 
       return res.status(500).json({
-        msg: `Failed to delete all videos of user ${userID}`,
+        msg: `Failed to delete all videos of user ${userID}: ${error}`,
       });
     }
   };

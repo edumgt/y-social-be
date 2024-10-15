@@ -4,5 +4,5 @@ paths:
       tags:
         - OTP
       responses:
-        '200':
+        "200":
           description: Successfully

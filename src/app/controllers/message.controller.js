@@ -1,3 +1,4 @@
+const ColorConsole = require("../lib/color-console");
 const MessageModel = require("../models/message.model");
 const UserModel = require("../models/user.model");
 const { imageController } = require("./image.controller");
@@ -47,7 +48,7 @@ class MessageController {
     });
   };
 
-  getAllMessages = async (req, res, next) => {
+  getAllMessages = async (req, res) => {
     try {
       const roomId = req.params.roomID;
       const messages = await MessageModel.find({
@@ -67,7 +68,7 @@ class MessageController {
     }
   };
 
-  deleteAllMessages = async (req, res, next) => {
+  deleteAllMessages = async (req, res) => {
     const userID = req.params.userID;
 
     try {
@@ -88,7 +89,7 @@ class MessageController {
     }
   };
 
-  getMessageByID = async (req, res, next) => {
+  getMessageByID = async (req, res) => {
     const msgID = req.params.msgID;
 
     try {
@@ -99,15 +100,15 @@ class MessageController {
         data: result,
       });
     } catch (error) {
-      console.error(`Failed to get message ${msgID}`);
+      ColorConsole.error(`Failed to get message ${msgID}`);
 
       return res.status(500).json({
-        msg: `Failed to get message ${msgID}`,
+        msg: `Failed to get message ${msgID}: ${error}`,
       });
     }
   };
 
-  updateMessage = async (req, res, next) => {
+  updateMessage = async (req, res) => {
     const msgID = req.params.msgID;
 
     try {

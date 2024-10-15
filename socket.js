@@ -5,6 +5,7 @@ require("dotenv").config();
 
 const io = new Server(httpServer, {
   cors: {
+    // eslint-disable-next-line no-undef
     origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
   },
@@ -120,7 +121,7 @@ io.on("connection", (socket) => {
       console.log(`User ${socket.id} disconnected`);
     });
   } catch (error) {
-    console.error("User cannot connected");
+    console.error("User cannot connected: ", error);
   }
 });
 

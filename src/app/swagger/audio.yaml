@@ -4,7 +4,7 @@ paths:
       tags:
         - Audio
       responses:
-        '200':
+        "200":
           description: Hello from audio :D
   /audio/all-audios/{userID}:
     get:
@@ -15,7 +15,7 @@ paths:
           in: path
           required: true
       responses:
-        '200':
+        "200":
           description: Successfully
   /audio/{audioID}:
     get:
@@ -26,12 +26,12 @@ paths:
           in: path
           required: true
       responses:
-        '200':
+        "200":
           description: Successfully
   /audio/upload:
     post:
       tags:
-        - Audio      
+        - Audio
       requestBody:
         required: true
         content:
@@ -48,7 +48,7 @@ paths:
                 name:
                   type: string
       responses:
-        '200':
+        "200":
           description: Successfully
   /audio/update/{audioID}:
     put:
@@ -64,13 +64,13 @@ paths:
           application/json:
             schema:
               type: object
-              properties: 
+              properties:
                 audioUrl:
                   type: string
                 cover:
                   type: string
       responses:
-        '200':
+        "200":
           description: Successfully
   /audio/delete/{audioID}:
     delete:
@@ -81,7 +81,7 @@ paths:
           in: path
           required: true
       responses:
-        '200':
+        "200":
           description: Successfully
   /audio/delete/all-audios/{userID}:
     delete:
@@ -92,5 +92,5 @@ paths:
           in: path
           required: true
       responses:
-        '200':
+        "200":
           description: Successfully

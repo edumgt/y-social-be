@@ -4,5 +4,5 @@ paths:
       tags:
         - Block list
       responses:
-        '200':
+        "200":
           description: Hello from block list :D
