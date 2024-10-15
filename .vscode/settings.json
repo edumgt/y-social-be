@@ -1,7 +1,7 @@
 {
-  "conventionalCommits.scopes": [
-    "enhance",
-    "feature",
-    "bug"
-  ]
+  "conventionalCommits.scopes": ["enhance", "feature", "bug"],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always"
+  },
+  "eslint.validate": ["javascript"]
 }

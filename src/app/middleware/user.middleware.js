@@ -1,3 +1,4 @@
+const ColorConsole = require("../lib/color-console");
 const User = require("../models/user.model");
 const { userService } = require("../services/user.service");
 
@@ -8,7 +9,7 @@ class UserMiddleware {
 
     // Check if all required fields are present
     if (!username || !password || !email) {
-      console.error(`Please provide all required fields`, error);
+      ColorConsole.error(`Please provide all required fields`);
       return res
         .status(404)
         .json({ message: "Please provide all required fields" });
@@ -18,7 +19,7 @@ class UserMiddleware {
     await User.findOne({ username: username })
       .then((existingUser) => {
         if (existingUser) {
-          console.error(`Username ${existingUser} already exists`, error);
+          ColorConsole.error(`Username ${existingUser} already exists`);
           return res.status(404).json({
             message: `Username ${existingUser} already exists`,
           });

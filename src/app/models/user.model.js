@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const mongoose = require("mongoose");
 require("dotenv").config();
 
@@ -38,14 +39,12 @@ const blackList = new mongoose.Schema(
   { timestamps: true },
 );
 
-const payment = new mongoose.Schema(
-  {
-    paymentId: {
-      type: String,
-      required: true,
-    }
+const payment = new mongoose.Schema({
+  paymentId: {
+    type: String,
+    required: true,
   },
-)
+});
 
 const User = new Schema(
   {

@@ -1,10 +1,12 @@
+/* eslint-disable no-undef */
 const cloudinary = require("cloudinary").v2;
 require("dotenv").config();
 
+const ColorConsole = require("../lib/color-console");
 const ImageModel = require("../models/image.model");
 
 class ImageController {
-  getAllImagesByUserID = async (req, res, next) => {
+  getAllImagesByUserID = async (req, res) => {
     const userID = req.params.userID;
 
     try {
@@ -25,7 +27,7 @@ class ImageController {
     }
   };
 
-  getAllImages = async (req, res, next) => {
+  getAllImages = async (req, res) => {
     try {
       const images = await ImageModel.find();
       return res.status(200).json({
@@ -33,16 +35,16 @@ class ImageController {
         quantity: images.length,
         data: images,
       });
-    } catch(error) {
+    } catch (error) {
       console.error(`Failed to get all images`, error);
 
       return res.status(500).json({
         msg: `Failed to get all images`,
       });
     }
-  }
+  };
 
-  getImageByID = async (req, res, next) => {
+  getImageByID = async (req, res) => {
     const imgID = req.params.imgID;
 
     try {
@@ -52,7 +54,7 @@ class ImageController {
         data: result,
       });
     } catch (error) {
-      console.error(`Failed to get image ${imgID}`);
+      console.error(`Failed to get image ${imgID}: ${error}`);
 
       return res.status(500).json({
         msg: `Failed to get image ${imgID}`,
@@ -73,7 +75,7 @@ class ImageController {
       });
   };
 
-  updateImageByUserID = async (req, res, next) => {
+  updateImageByUserID = async (req, res) => {
     const imgID = req.params.imgID;
     const userID = req.params.userID;
 
@@ -90,7 +92,7 @@ class ImageController {
         data: updatedImage,
       });
     } catch (error) {
-      console.error(`Failed to update image ${imgID}`);
+      console.error(`Failed to update image ${imgID}: ${error}`);
 
       return res.status(500).json({
         msg: `Failed to update image`,
@@ -98,7 +100,7 @@ class ImageController {
     }
   };
 
-  deleteAllImagesByUserID = async (req, res, next) => {
+  deleteAllImagesByUserID = async (req, res) => {
     const userID = req.params.userID;
     try {
       const result = await ImageModel.deleteMany({ userID });
@@ -108,12 +110,12 @@ class ImageController {
         count: result.deletedCount,
       });
     } catch (error) {
-      console.error(
+      ColorConsole.error(
         `Failed to delete all images of user ${userID} successfully`,
       );
 
       return res.status(500).json({
-        msg: `Failed to delete all images of user ${userID}`,
+        msg: `Failed to delete all images of user ${userID}: ${error}`,
       });
     }
   };
@@ -137,7 +139,7 @@ class ImageController {
     });
   };
 
-  fetchUserSpecificImageQuantity = async (req, res, next) => {
+  fetchUserSpecificImageQuantity = async (req, res) => {
     const userID = req.params.userID;
     const limit = parseInt(req.query.limit);
 
@@ -149,8 +151,9 @@ class ImageController {
         data: imageQuantity,
       });
     } catch (error) {
+      ColorConsole.error(`Failed to get image of user ${userID}`);
       return res.status(500).json({
-        msg: `Failed to get image of user ${userID}`,
+        msg: `Failed to get image of user ${userID}: ${error}`,
       });
     }
   };

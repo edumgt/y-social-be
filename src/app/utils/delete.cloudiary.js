@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const cloudinary = require("cloudinary").v2;
 
 const deleteOnCloudiary = async (mediaValue, isAudio) => {
