@@ -1,8 +1,13 @@
 {
   "conventionalCommits.scopes": ["enhance", "feature", "bug"],
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "always",
-    "source.formatDocument": "always"
+    "source.addMissingImports": "always",
+    "source.fixAll.eslint": "always",  // Fix ESLint errors
+    "source.organizeImports": "always",    // Sort imports
   },
-  "eslint.validate": ["javascript"]
+  "eslint.validate": ["javascript"],
+  "eslint.format.enable": true,
+  "eslint.run": "onSave",
+  "editor.formatOnSave": true,
+  "eslint.debug": true,
 }
