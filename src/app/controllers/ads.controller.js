@@ -4,6 +4,14 @@ const { adsService } = require("../services/ads.service");
 const { handleRequest } = require("../utils/handle-request");
 
 class AdsController {
+  constructor() {
+    this.clicks = {};
+    this.impressions = {};
+    this.clickRateLimit = 5; // Allow 5 clicks per hour
+    this.impressionRateLimit = 10; // Allow 10 impressions per hour
+  }
+
+
   async createAd(req, res) {
     await handleRequest(req, res, async () => {
       const { schedule_start, ...body } = req.body;
@@ -124,6 +132,55 @@ class AdsController {
       const result = await adsService.getSchedulingAdvertise();
       return result;
     });
+  }
+
+  async handleClick(req, res) {
+    const adId = req.params.id;
+    const userId = req.userId;
+    const now = Date.now();
+
+    // Rate limiting logic for clicks
+    if (!this.clicks[userId]) this.clicks[userId] = {};
+    if (!this.clicks[userId][adId]) this.clicks[userId][adId] = { count: 0, lastTimestamp: 0 };
+
+    const userClickData = this.clicks[userId][adId];
+    if (now - userClickData.lastTimestamp < 3600000 && userClickData.count >= this.clickRateLimit) {
+      return res.status(429).send({ message: "Too many clicks. Please try again later." });
+    }
+
+    userClickData.count += 1;
+    userClickData.lastTimestamp = now;
+
+    await adsService.recordClick(adId); // Call service to record click
+    return res.status(200).send({ message: "Click recorded." });
+  }
+
+  async handleImpression(req, res) {
+    const adId = req.params.id;
+    const userId = req.userId;
+    const now = Date.now();
+
+    // Rate limiting logic for impressions
+    if (!this.impressions[userId]) this.impressions[userId] = {};
+    if (!this.impressions[userId][adId]) this.impressions[userId][adId] = { count: 0, lastTimestamp: 0 };
+
+    const userImpressionData = this.impressions[userId][adId];
+    if (now - userImpressionData.lastTimestamp < 3600000 && userImpressionData.count >= this.impressionRateLimit) {
+      return res.status(429).send({ message: "Too many impressions. Please try again later." });
+    }
+
+    userImpressionData.count += 1;
+    userImpressionData.lastTimestamp = now;
+
+    await adsService.recordImpression(adId); // Call service to record impression
+    return res.status(200).send({ message: "Impression recorded." });
+  }
+
+  async handleClicks(req, res) {
+    await handleRequest(req, res, async () => {
+      const adId = req.params.id;
+      return await adsService.handleClicks(adId);
+    })
   }
 }
 
