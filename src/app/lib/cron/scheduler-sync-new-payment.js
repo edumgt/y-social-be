@@ -1,10 +1,10 @@
 const cron = require("node-cron");
-const { paymentCassoService } = require("../services/payment-casso.service");
-const ColorConsole = require("./color-console");
-const { formatDateTime } = require("../utils/format-date");
+const { paymentCassoService } = require("../../services/payment-casso.service");
+const ColorConsole = require("../color-console");
+const { formatDateTime } = require("../../utils/format-date");
 const RUN_EVERY_1_MINUTE = "*/1 * * * *";
 
-cron.schedule(RUN_EVERY_1_MINUTE, async () => {
+const scheduleSyncNewPayment = cron.schedule(RUN_EVERY_1_MINUTE, async () => {
   try {
     ColorConsole("info", `Bắt đầu kiểm tra giao dịch mới...              ${formatDateTime(new Date())}`);
     await paymentCassoService.handleUserPaid();
@@ -13,3 +13,5 @@ cron.schedule(RUN_EVERY_1_MINUTE, async () => {
     ColorConsole("error", `Cập nhật giao dịch mới không thành công: ${err}      ${formatDateTime(new Date())}`);
   }
 });
+
+module.exports = scheduleSyncNewPayment;
