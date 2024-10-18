@@ -21,6 +21,7 @@ router.post("/create", validateAdCreation, adsController.createAd);
 router.get("/user/:userId", validateAds, adsController.getAdByUser);
 router.get("/trending", adsController.getAdByTrend);
 router.get("/get-all", adsController.getAllAds);
+router.get("/scheduling", adsController.getSchedulingAdvertise);
 router.get("/:id", validateAds, adsController.getAdById);
 router.delete("/delete-all/user/:userId", adsController.deleteAllAdByUser);
 router.delete(

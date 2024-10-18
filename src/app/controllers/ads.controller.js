@@ -11,6 +11,7 @@ class AdsController {
       // Initialize adData
       const adData = {
         userID: req.userId,
+        link_action: "https://i.pinimg.com/enabled_hi/564x/cd/aa/56/cdaa5630b421cb002ba19ce817e8e80c.jpg",
         ...body,
         schedule_start: schedule_start ? new Date(schedule_start) : new Date(),
       };
@@ -115,6 +116,13 @@ class AdsController {
   async getAdByTrend(req, res) {
     await handleRequest(req, res, async () => {
       return await adsService.getAdByTrend();
+    });
+  }
+
+  async getSchedulingAdvertise(req, res) {
+    await handleRequest(req, res, async () => {
+      const result = await adsService.getSchedulingAdvertise();
+      return result;
     });
   }
 }

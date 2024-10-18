@@ -120,6 +120,37 @@ class AdsRepository extends IAds {
       throw error;
     }
   }
+
+  async getSchedulingAdvertise () {
+    try {
+      const now = new Date();
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(startOfDay);
+      endOfDay.setHours(23, 59, 59, 999); // End of the day
+
+      const adList = await AdModel.find({
+        schedule_start: { $gte: startOfDay, $lte: endOfDay }
+      })
+      .sort({ createdAt: -1 })
+      .exec();
+
+      if (now.getHours() === 0 && now.getMinutes() === 0) {
+        // Update status of the ads
+        for (const ad of adList) {
+          ad.status = 'active'; // or whatever status you want to set
+          await ad.save(); // Save the updated ad
+        }
+
+        return adList; // Return the updated ad list if needed
+      }
+
+      return adList;
+    } catch (error) {
+      console.error(ERRORS_ADS_REPOSITORY.SCHEDULLING_ADS, error.message);
+      throw error;
+    }
+  }
 }
 
 const adsRepository = new AdsRepository();

@@ -10,6 +10,6 @@ cron.schedule(RUN_EVERY_1_MINUTE, async () => {
     await paymentCassoService.handleUserPaid();
     ColorConsole("success", `Đã kiểm tra và cập nhật số dư người dùng.   ${formatDateTime(new Date())}`);
   } catch (err) {
-    ColorConsole("error", `Error schedule sync new transfer: ${err}      ${formatDateTime(new Date())}`);
+    ColorConsole("error", `Cập nhật giao dịch mới không thành công: ${err}      ${formatDateTime(new Date())}`);
   }
 });
