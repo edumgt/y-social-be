@@ -16,7 +16,7 @@ const scheduleStartAdvertise = cron.schedule(RUN_EVERY_MIDNIGHT, async () => {
     try {
         ColorConsole("info", `Bắt đầu quét toàn bộ quảng cáo hôm nay...              ${formatDateTime(new Date())}`);
         await adsService.getSchedulingAdvertise();
-        ColorConsole("success", `Đã quét toàn bộ quảng cáo và cập nhật thành công.              ${formatDateTime(new Date())}`);
+        ColorConsole("success", `Đã quét và cập nhật toàn bộ quảng cáo.              ${formatDateTime(new Date())}`);
     } catch (error) {
         ColorConsole("error", `Lỗi quét toàn bộ quảng cáo: ${error}              ${formatDateTime(new Date())}`);
     }
