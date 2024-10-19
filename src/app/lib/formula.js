@@ -42,10 +42,28 @@ class Formula extends IFormula {
 
   async calculateCost(impressions, clicks, budget) {
     try {
-      const costPerThousandImpressions = this.calculateCPM(budget, impressions);
-      const costPerClick = this.calculateCPC(budget, clicks);
-      const costFromImpressions = (impressions * costPerThousandImpressions) / 1000;
-      const costFromClicks = clicks * costPerClick;
+      const costPerThousandImpressions = impressions > 0 
+          ? this.calculateCPM(budget, impressions) 
+          : 0;
+
+      // Calculate cost per click
+      const costPerClick = clicks > 0 
+          ? this.calculateCPC(budget, clicks) 
+          : 0;
+
+      // Calculate cost from impressions
+      const costFromImpressions = impressions > 0 
+          ? (impressions * costPerThousandImpressions) / 1000 
+          : 0;
+
+      // Calculate cost from clicks
+      const costFromClicks = clicks > 0 
+          ? clicks * costPerClick 
+          : 0;
+
+      const totalCTR = this.calculateCTR(clicks, impressions);
+
+      // Calculate total cost
       const totalCost = costFromImpressions + costFromClicks;
 
       return {
@@ -53,7 +71,8 @@ class Formula extends IFormula {
         costPerClick,
         costFromImpressions,
         costFromClicks,
-        totalCost,
+        totalCost: totalCost.toFixed(0),
+        totalCTR
       };
     } catch (error) {
       console.error("Error calculating cost:", error.message);

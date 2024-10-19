@@ -2,7 +2,10 @@ const express = require("express");
 const {
   paymentCassoController,
 } = require("../controllers/payment-casso.controller");
+const { checkPermissions } = require("../lib/check-permission");
 const router = express.Router();
+
+router.use(checkPermissions);
 
 router.get("/", paymentCassoController.getAll);
 router.get("/user-info", paymentCassoController.getDetailUser);

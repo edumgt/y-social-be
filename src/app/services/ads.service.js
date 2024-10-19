@@ -132,10 +132,32 @@ class AdsService extends IAdsService {
       throw new Error(ERRORS.DEFAULT);
     }
   }
+
+  async handleImpressions(adId) {
+    try {
+        const result = await adsRepository.handleImpressions(adId);
   
+        if(!result) {
+          return {
+            message: "Update Clicks failed",
+            adId: adId,
+            data: result
+          };
+        }
+        
+        return {
+          message: "Successfully",
+          data: result
+        };
+      } catch (error) {
+        console.error(ERROR_ADS_SERVICE.IMPRESSIONS_AD, error);
+        throw new Error(ERRORS.DEFAULT);
+      }
+  }
+
   async handleClicks(adId) {
     try {
-      const result = await adsRepository.handleClicks();
+      const result = await adsRepository.handleClicks(adId);
       
       if(!result) {
         return {
@@ -150,7 +172,7 @@ class AdsService extends IAdsService {
         data: result
       };
     } catch (error) {
-      console.error(ERROR_ADS_SERVICE.TRENDING_ADS, error);
+      console.error(ERROR_ADS_SERVICE.CLICKS_AD, error);
       throw new Error(ERRORS.DEFAULT);
     }
   }

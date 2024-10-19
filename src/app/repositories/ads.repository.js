@@ -152,13 +152,67 @@ class AdsRepository extends IAds {
     }
   }
 
+  async getDailyAnalytics(adId) {
+    const ad = await AdModel.findById(adId);
+
+    // Update the click count in the ad's result array for today
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0]; // 2024-10-
+    
+    // Find today's analytics entry
+    const dailyAnalytics = ad.result.find(
+      (analytics) => analytics.date.toISOString().split('T')[0] === todayString
+    );
+
+    return dailyAnalytics;
+  }
+
+  async handleImpressions(adId) {
+    const ad = await AdModel.findById(adId);
+    
+    // Update the click count in the ad's result array for today
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0]; // 2024-10-25
+    
+    // Find today's analytics entry
+    const dailyAnalytics = ad.result.find(
+      (analytics) =>  analytics.date.toISOString().split('T')[0] === todayString
+    );
+
+    if (dailyAnalytics) {
+      // Update the clicks if today's entry exists
+      dailyAnalytics.impressions += 1;
+      const { totalCost, totalCTR } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
+      dailyAnalytics.cost = totalCost;
+      dailyAnalytics.ctr = totalCTR;
+    } else {
+      // Create a new entry for today's date if it doesn't exist
+      const newEntry = {
+        date: today,
+        clicks: 0,
+        impressions: 1,
+        conversions: 0,
+        cost: 0,
+        ctr: 0,
+      }
+      
+      const { totalCost } = await formula.calculateCost(newEntry.impressions, newEntry.clicks, ad.budget)
+      newEntry.cost = totalCost;
+
+      ad.result.push(newEntry);
+    }
+
+    await ad.save(); // Save the updated ad document
+    return ad;
+  }
+
   async handleClicks(adId) {
     const ad = await AdModel.findById(adId);
     
-     // Update the click count in the ad's result array for today
+    // Update the click count in the ad's result array for today
     const today = new Date();
-    const todayString = today.toISOString().split('T')[0];
-
+    const todayString = today.toISOString().split('T')[0]; // 2024-10-
+    
     // Find today's analytics entry
     const dailyAnalytics = ad.result.find(
       (analytics) => analytics.date.toISOString().split('T')[0] === todayString
@@ -166,10 +220,10 @@ class AdsRepository extends IAds {
 
     if (dailyAnalytics) {
       // Update the clicks if today's entry exists
-      dailyAnalytics.clicks += 1; // Increment clicks
+      dailyAnalytics.clicks += 1;
       dailyAnalytics.impressions += 1;
       const { totalCost } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
-      ad.result.cost = totalCost;
+      dailyAnalytics.cost = totalCost;
     } else {
       // Create a new entry for today's date if it doesn't exist
       ad.result.push({
