@@ -16,7 +16,10 @@ const rateLimitImpressions = rateLimit({
 const rateLimitClicks = rateLimit({
   windowMs: 300 * 1000, // 5 minute
   max: 2, // Limit each IP to 2 clicks per minute
-  message: "Too many requests, please try again later."
+  message: "Too many requests, please try again later.",
+  handler: (req, res) => {
+    return res.status(204).send();
+  }
 });
 
 class AdsController {
@@ -143,21 +146,25 @@ class AdsController {
   }
 
   async handleImpression(req, res) {
-    await handleRequest(req, res, async () => {
-      const adId = req.params.id;
-      return await adsService.handleImpressions(adId);
-    });
+    rateLimitImpressions(req, res, async (err) => {
+        if(!err) {
+          await handleRequest(req, res, async () => {
+          const adId = req.params.id;
+          return await adsService.handleClicks(adId);
+        });
+      }
+    })
   }
 
   async handleClicks(req, res) {
-    // rateLimitClicks(req, res, async (err) => {
-    //   if(!err) {
+    rateLimitClicks(req, res, async (err) => {
+      if(!err) {
         await handleRequest(req, res, async () => {
           const adId = req.params.id;
           return await adsService.handleClicks(adId);
         })
-      // }
-    // });
+      }
+    });
   }
 }
 

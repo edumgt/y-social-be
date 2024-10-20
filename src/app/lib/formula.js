@@ -67,6 +67,7 @@ class Formula extends IFormula {
 
   // this calculate for cost per day
   calculateTotalCostPerDay(costFromImpressions, costFromClicks) {
+    if(costFromImpressions <= 0 && costFromClicks <= 0 || isNaN(costFromImpressions) || isNaN(costFromClicks)) return 0;
     const result = costFromImpressions + costFromClicks;
     return result;
   }
@@ -81,7 +82,11 @@ class Formula extends IFormula {
 
   // cost from impression
   calculateCFI(clicks, impressions, costPerThousandImpressions) {
-    if (clicks < 0 && impressions < 0) return 0;
+    if (clicks <= 0 && impressions <= 0 && costPerThousandImpressions <= 0 
+      || isNaN(clicks) 
+      || isNaN(impressions) 
+      || isNaN(costPerThousandImpressions)) 
+    return 0;
     const result = Math.round((impressions * costPerThousandImpressions) / 1000);
     return result;
   }
@@ -97,7 +102,7 @@ class Formula extends IFormula {
   // while a high one might signal it's time to shake things up.
   // visit: https://adcalculators.com/cost-per-view-cpv-calculator/ to know more
   calculateCPV(totalAdSpent, totalImpressions) {
-    if(totalImpressions <= 0) return 0;
+    if(totalImpressions <= 0 && totalAdSpent <= 0 || isNaN(totalAdSpent) || isNaN(totalImpressions)) return 0;
     const result = Math.round(totalAdSpent / totalImpressions);
     return result;
   }
@@ -112,7 +117,7 @@ class Formula extends IFormula {
   // Low CTR? Your content isn't resonating with your audience and 
   // you may need to adjust it.
   calculateCTR(clicks, impressions) {
-    if (impressions <= 0) return 0;
+    if (impressions <= 0 && impressions <= 0 || isNaN(clicks) || isNaN(impressions)) return 0;
     const result = ((clicks / impressions) * 100).toFixed(2);
     return result;
   }
@@ -144,7 +149,7 @@ class Formula extends IFormula {
   // Yet, you don't ever want to expand your audience so much 
   // that you advertise to people who don't fit in your ICP's (Ideal Customer Profiles).
   calculateCPM(budget, impressions) {
-    if(impressions < 0) return 0;
+    if(impressions <= 0 && budget <= 0 || isNaN(budget) || isNaN(impressions)) return 0;
     const result = Math.round(budget / (impressions / 1000));
     return result;
   }
@@ -158,7 +163,8 @@ class Formula extends IFormula {
   // a different campaign targeted at a niche audience.
   // visit: https://adcalculators.com/cpc-cost-per-click-calculator/ to know more
   calculateCPC(budget, totalClicks) {
-    if (totalClicks <= 0) return 0;
+    if (totalClicks <= 0 && budget <= 0 || totalClicks <= 0 || isNaN(budget) || isNaN(totalClicks)) return 0;
+    console.log(budget, totalClicks)
     const result = Math.round(budget / totalClicks);
     return result;
   }

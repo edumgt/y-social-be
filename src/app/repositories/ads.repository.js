@@ -200,8 +200,8 @@ class AdsRepository extends IAds {
         date: today,
         impressions: 1,
       }
-      const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
-      const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions);
+      const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(newEntry.impressions, newEntry.clicks, ad.budget)
+      const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, newEntry.impressions);
       const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
 
       newEntry.cost = discountCost;
@@ -237,7 +237,6 @@ class AdsRepository extends IAds {
       const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
       const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions);
       const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
-
       dailyAnalytics.cost = discountCost;
       dailyAnalytics.ctr = totalCTR;
       dailyAnalytics.cpc = costPerClick;
@@ -252,8 +251,8 @@ class AdsRepository extends IAds {
         clicks: 1,
         impressions: 1,
       }
-      const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
-      const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions);
+      const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(newEntry.impressions, newEntry.clicks, ad.budget)
+      const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, newEntry.impressions);
       const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
 
       newEntry.cost = discountCost;
