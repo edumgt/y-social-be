@@ -76,7 +76,8 @@ class AdsRepository extends IAds {
     }
   }
 
-  async calculateAdsScore(ad) {
+  async calculateAdsScore(id) {
+    const ad = await AdModel.findById(id).exec();
     const { result, _id } = ad;
     const { impressions, clicks, conversions } = result;
 
@@ -182,22 +183,33 @@ class AdsRepository extends IAds {
     if (dailyAnalytics) {
       // Update the clicks if today's entry exists
       dailyAnalytics.impressions += 1;
-      const { totalCost, totalCTR } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
-      dailyAnalytics.cost = totalCost;
+      const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
+      const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions);
+      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
+
+      dailyAnalytics.cost = discountCost;
       dailyAnalytics.ctr = totalCTR;
+      dailyAnalytics.cpc = costPerClick;
+      dailyAnalytics.cpv = costPerView;
+      dailyAnalytics.cpm = costPerThousandImpressions;
+      ad.score = score;
+
     } else {
       // Create a new entry for today's date if it doesn't exist
       const newEntry = {
         date: today,
-        clicks: 0,
         impressions: 1,
-        conversions: 0,
-        cost: 0,
-        ctr: 0,
       }
-      
-      const { totalCost } = await formula.calculateCost(newEntry.impressions, newEntry.clicks, ad.budget)
-      newEntry.cost = totalCost;
+      const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
+      const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions);
+      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
+
+      newEntry.cost = discountCost;
+      newEntry.ctr = totalCTR;
+      newEntry.cpc = costPerClick;
+      newEntry.cpv = costPerView;
+      newEntry.cpm = costPerThousandImpressions;
+      ad.score = score;
 
       ad.result.push(newEntry);
     }
@@ -214,7 +226,7 @@ class AdsRepository extends IAds {
     const todayString = today.toISOString().split('T')[0]; // 2024-10-
     
     // Find today's analytics entry
-    const dailyAnalytics = ad.result.find(
+    let dailyAnalytics = ad.result.find(
       (analytics) => analytics.date.toISOString().split('T')[0] === todayString
     );
 
@@ -222,21 +234,36 @@ class AdsRepository extends IAds {
       // Update the clicks if today's entry exists
       dailyAnalytics.clicks += 1;
       dailyAnalytics.impressions += 1;
-      const { totalCost } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
-      dailyAnalytics.cost = totalCost;
+      const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
+      const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions);
+      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
+
+      dailyAnalytics.cost = discountCost;
+      dailyAnalytics.ctr = totalCTR;
+      dailyAnalytics.cpc = costPerClick;
+      dailyAnalytics.cpv = costPerView;
+      dailyAnalytics.cpm = costPerThousandImpressions;
+      ad.score = score;
+
+      await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions)
     } else {
-      // Create a new entry for today's date if it doesn't exist
-      ad.result.push({
+      const newEntry = {
         date: today,
         clicks: 1,
         impressions: 1,
-        conversions: 0,
-        cost: 0,
-        ctr: 0,
-      });
+      }
+      const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
+      const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions);
+      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
 
-      const { totalCost } = await formula.calculateCost(ad.result.impressions, ad.result.clicks, ad.budget)
-      ad.result.cost = totalCost;
+      newEntry.cost = discountCost;
+      newEntry.ctr = totalCTR;
+      newEntry.cpc = costPerClick;
+      newEntry.cpv = costPerView;
+      newEntry.cpm = costPerThousandImpressions;
+      ad.score = score;
+
+      ad.result.push(newEntry);
     }
 
     await ad.save(); // Save the updated ad document

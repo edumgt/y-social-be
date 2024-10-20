@@ -143,25 +143,21 @@ class AdsController {
   }
 
   async handleImpression(req, res) {
-    rateLimitImpressions(req, res, async (err) => {
-      if(!err) {
-        await handleRequest(req, res, async () => {
-          const adId = req.params.id;
-          return await adsService.handleImpressions(adId);
-        });
-      }
+    await handleRequest(req, res, async () => {
+      const adId = req.params.id;
+      return await adsService.handleImpressions(adId);
     });
   }
 
   async handleClicks(req, res) {
-    rateLimitClicks(req, res, async (err) => {
-      if(!err) {
+    // rateLimitClicks(req, res, async (err) => {
+    //   if(!err) {
         await handleRequest(req, res, async () => {
           const adId = req.params.id;
           return await adsService.handleClicks(adId);
         })
-      }
-    });
+      // }
+    // });
   }
 }
 
