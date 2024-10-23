@@ -9,16 +9,15 @@ const cron = require("node-cron");
 // const RUN_EVERY_MIDNIGHT = "0 0 * * *";
 const RUN_EVERY_MIDNIGHT = "*/1 * * * *";
 const ColorConsole = require("../color-console");
-const { formatDateTime } = require("../../utils/format-date");
 const { adsService } = require("../../services/ads.service");
 
 const scheduleStartAdvertise = cron.schedule(RUN_EVERY_MIDNIGHT, async () => {
     try {
-        ColorConsole("info", `Bắt đầu quét toàn bộ quảng cáo hôm nay...              ${formatDateTime(new Date())}`);
+        ColorConsole.info(`Bắt đầu quét toàn bộ quảng cáo hôm nay...`);
         await adsService.getSchedulingAdvertise();
-        ColorConsole("success", `Đã quét và cập nhật toàn bộ quảng cáo.              ${formatDateTime(new Date())}`);
+        ColorConsole.success(`Đã quét và cập nhật toàn bộ quảng cáo.`);
     } catch (error) {
-        ColorConsole("error", `Lỗi quét toàn bộ quảng cáo: ${error}              ${formatDateTime(new Date())}`);
+        ColorConsole.error(`Lỗi quét toàn bộ quảng cáo: ${error}`);
     }
 });
 

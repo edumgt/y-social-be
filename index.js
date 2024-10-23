@@ -16,6 +16,7 @@ const startServer = async () => {
       ColorConsole.success(
         `Socket connected successfully on port ${SOCKET_PORT}`,
       );
+
       ColorConsole.success(
         `Swagger is running on: "http://localhost:${SOCKET_PORT}/api/v1/swagger"`,
       );

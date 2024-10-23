@@ -1,13 +1,17 @@
 const cron = require("node-cron");
 const { adsAnalyticsService } = require("../../services/ads-analytics.service");
-const RUN_PER_DAY = "0 0 * * *";
+const RUN_EVERY_1_MINUTE = "*/1 * * * *";
 const ColorConsole = require("../color-console");
 
-cron.schedule(RUN_PER_DAY, async () => {
+const schedulerUpdateAdvertiseAnaylytics = cron.schedule(RUN_EVERY_1_MINUTE, async () => {
   try {
+    ColorConsole.info("Bắt đầu cập nhật kết quả cho các quảng cáo...");
     await adsAnalyticsService.updateDailyAnalytics();
-    ColorConsole.success("Daily analytics updated successfully.");
+    ColorConsole.success("Đã Cập nhật kết quả cho các quảng cáo");
   } catch (error) {
-    ColorConsole.error("Error updating daily analytics: ", error);
+    ColorConsole.error("Lỗi cập nhật kết quả cho các quảng cáo: ", error);
   }
 });
+
+module.exports = schedulerUpdateAdvertiseAnaylytics;
+

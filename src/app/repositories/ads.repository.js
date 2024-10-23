@@ -287,14 +287,19 @@ class AdsRepository extends IAds {
       // eslint-disable-next-line no-unused-vars
       return Array.from(userBalances.entries()).map(([_, balance]) => {
         let status;
-        if (balance < ad.budget) {
-          status = ADS_STATUS.SUSPENDED;
-        } else if (ad.schedule_start < now) {
-          status = ADS_STATUS.SCHEDULE;
-        } else if (ad.schedule_start > now && ad.schedule_end > now) {
-          status = ADS_STATUS.ACTIVE;
-        }
+        const hasEnoughBudget = balance >= ad.budget;
+        const isScheduled = ad.schedule_start > now;
 
+        if (!hasEnoughBudget) {
+          status = ADS_STATUS.SUSPENDED;
+        } else {
+          if (isScheduled) {
+            status = ADS_STATUS.SCHEDULE;
+          } else {
+            status = ADS_STATUS.ACTIVE;
+          }
+        }
+        
         return status ? {
           id: ad.id,
           update: { status, isEnoughBudget: status !== ADS_STATUS.SUSPENDED }
