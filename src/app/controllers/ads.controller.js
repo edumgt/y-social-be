@@ -3,6 +3,8 @@ const { CurrencyConverter } = require("../lib/convert");
 const { adsService } = require("../services/ads.service");
 const { handleRequest } = require("../utils/handle-request");
 const { default: rateLimit } = require("express-rate-limit");
+const { userService } = require("../services/user.service");
+const { ADS_STATUS } = require("../constants/ads");
 
 const rateLimitImpressions = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
@@ -25,19 +27,24 @@ const rateLimitClicks = rateLimit({
 class AdsController {
   async createAd(req, res) {
     await handleRequest(req, res, async () => {
-      const { schedule_start, ...body } = req.body;
+      const { schedule_start, budget, userID } = req.body;
+      const userBalance = await userService.checkBalance(userID)
 
-      // Initialize adData
       const adData = {
-        userID: req.userId,
+        userID,
         link_action: "https://i.pinimg.com/enabled_hi/564x/cd/aa/56/cdaa5630b421cb002ba19ce817e8e80c.jpg",
-        ...body,
+        ...req.body,
         schedule_start: schedule_start ? new Date(schedule_start) : new Date(),
       };
 
       // Compare schedule_start with the current date
       if (adData.schedule_start < new Date()) {
-        adData.status = "schedule";
+        adData.status = ADS_STATUS.SCHEDULE;
+      }
+
+      if(userBalance < budget) {
+        adData.status = ADS_STATUS.SUSPENDED;
+        adData.isEnoughBudget = false;
       }
 
       // Set schedule_start to today's date if not provided
@@ -54,6 +61,7 @@ class AdsController {
         },
       ];
       adData.result = InitializeResult;
+
       return await adsService.createAd(adData);
     });
   }
@@ -165,6 +173,18 @@ class AdsController {
         })
       }
     });
+  }
+
+  async isBalanceSufficientForDailyBudget(req, res) {
+    handleRequest(req, res, async () => {
+      const result = await adsService.isBalanceSufficientForDailyBudget();
+      return res.status(200).json(
+        {
+          message: "Successfully",
+          data: result
+        }
+      );
+    })
   }
 }
 

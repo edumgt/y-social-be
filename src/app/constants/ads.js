@@ -35,4 +35,12 @@ const ADS_GOAL = {
   ENGAGEMENT: "engagement",
 };
 
-module.exports = { ADS_TYPE, ADS_GOAL, MIN_BUDGET, STRATEGY };
+const ADS_STATUS = {
+  SCHEDULE: "schedule",
+  ACTIVE: "active",
+  DISABLED: "disabled",
+  SUSPENDED: "suspended",
+  IN_REVIEW: "in-review",
+};
+
+module.exports = { ADS_TYPE, ADS_GOAL, MIN_BUDGET, STRATEGY, ADS_STATUS };

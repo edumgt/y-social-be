@@ -119,7 +119,7 @@ const adsSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["active", "schedule", "disabled"],
+      enum: ["active", "schedule", "disabled", "suspended", "in_review"],
       default: "active",
     },
     goal: {
@@ -128,6 +128,10 @@ const adsSchema = new mongoose.Schema(
     },
     adTargetAudience: {
       type: targetAudienceSchema,
+    },
+    isEnoughBudget: {
+      type: Boolean,
+      default: true,
     },
     result: [dailyAdAnalyticsSchema],
     score: {

@@ -164,9 +164,9 @@ class Formula extends IFormula {
   // visit: https://adcalculators.com/cpc-cost-per-click-calculator/ to know more
   calculateCPC(budget, totalClicks) {
     if (totalClicks <= 0 && budget <= 0 || totalClicks <= 0 || isNaN(budget) || isNaN(totalClicks)) return 0;
-    console.log(budget, totalClicks)
     const result = Math.round(budget / totalClicks);
-    return result;
+    const MAX_COST_PER_CLICK = 15000;
+    return Math.min(result, MAX_COST_PER_CLICK);
   }
 
   // The purpose of calculating the CPA is to determine the average cost of acquiring 

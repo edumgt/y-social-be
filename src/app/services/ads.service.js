@@ -176,6 +176,16 @@ class AdsService extends IAdsService {
       throw new Error(ERRORS.DEFAULT);
     }
   }
+
+  async isBalanceSufficientForDailyBudget() {
+    try {
+      const result = await adsRepository.isBalanceSufficientForDailyBudget();
+      return result;
+    } catch (error) {
+      console.error(ERROR_ADS_SERVICE.IS_BALANCE_SUFFICIENT_FOR_DAILY_BUDGET, error);
+      throw new Error(ERRORS.DEFAULT);
+    }
+  }
 }
 
 const adsService = new AdsService();

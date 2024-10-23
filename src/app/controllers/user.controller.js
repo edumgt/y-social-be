@@ -539,6 +539,23 @@ class UserController {
         console.error("Error updating user roles:", error.message);
     }
   }
+
+  checkBalance = async (req, res) => {
+    try {
+      const userID = req.params.userID;
+      const balance = await userService.checkBalance(userID);
+      return res.status(200).json({
+        msg: "Successfully",
+        data: balance,
+      });
+    } catch (error) {
+      ColorConsole("error",`Error retrieving user balance: ${error}`);
+      return res.status(500).json({
+        msg: `Error retrieving user balance: ${error}`,
+      });
+
+    }
+  }
 }
 
 const userController = new UserController();

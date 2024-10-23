@@ -5,8 +5,6 @@ const {
   adAuthorization,
   validateBudget,
   validateAds,
-  rateLimitImpressions,
-  rateLimitClick,
 } = require("../middleware/ads.middleware");
 const { adsController } = require("../controllers/ads.controller");
 
@@ -19,11 +17,10 @@ router.put(
   validateBudget,
   adsController.updateAd,
 );
+
 router.post("/create", validateAdCreation, adsController.createAd);
 router.post("/:id/impressions", validateAds, adsController.handleImpression);
 router.post("/:id/clicks", validateAds, adsController.handleClicks);
-// router.post("/:id/impressions", rateLimitImpressions, validateAds, adsController.handleImpression);
-// router.post("/:id/clicks", rateLimitClick, validateAds, adsController.handleClicks);
 router.get("/user/:userId", validateAds, adsController.getAdByUser);
 router.get("/trending", adsController.getAdByTrend);
 router.get("/get-all", adsController.getAllAds);

@@ -26,6 +26,11 @@ class UserRepository {
 
     return user;
   }
+
+  async checkBalance(userID) {
+    const user = await userModel.findById(userID);
+    return user.balance;
+  }
 }
 
 const userRepository = new UserRepository();
