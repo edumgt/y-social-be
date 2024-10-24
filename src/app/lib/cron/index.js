@@ -4,7 +4,7 @@ const scheduleSyncNewPayment = require("./scheduler-sync-new-payment");
 const scheduleCheckUserBudget = require("./schedule-check-user-budget");
 const schedulerUpdateAdvertiseAnaylytics = require("./scheduler-update-advertise-anaylytics");
 
+scheduleSyncNewPayment.start();
 scheduleCheckUserBudget.start();
 scheduleStartAdvertise.start();
 schedulerUpdateAdvertiseAnaylytics.start();
-scheduleSyncNewPayment.start();

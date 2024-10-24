@@ -181,6 +181,7 @@ class AdsRepository extends IAds {
 
   async handleImpressions(adId) {
     const ad = await AdModel.findById(adId);
+    const user = await userService.findUserById(ad.userID);
 
     // Update the click count in the ad's result array for today
     const today = new Date();
@@ -197,6 +198,13 @@ class AdsRepository extends IAds {
       const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
       const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions);
       const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
+      
+      if(user.balance < discountCost) {
+        ad.status = ADS_STATUS.SUSPENDED;
+        ad.isEnoughBudget = false;
+        await ad.save();
+        return ad;
+      }
 
       dailyAnalytics.cost = discountCost;
       dailyAnalytics.ctr = totalCTR;
@@ -204,7 +212,6 @@ class AdsRepository extends IAds {
       dailyAnalytics.cpv = costPerView;
       dailyAnalytics.cpm = costPerThousandImpressions;
       ad.score = score;
-
     } else {
       // Create a new entry for today's date if it doesn't exist
       const newEntry = {
@@ -245,15 +252,23 @@ class AdsRepository extends IAds {
     if (dailyAnalytics) {
       // Update the clicks if today's entry exists
       dailyAnalytics.clicks += 1;
-      dailyAnalytics.impressions += 1;
       const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
       const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions);
-      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
+      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);      
+
+      if(user.balance < discountCost) {
+        ad.status = ADS_STATUS.SUSPENDED;
+        ad.isEnoughBudget = false;
+        await ad.save();
+        return ad;
+      }
+
       dailyAnalytics.cost = discountCost;
       dailyAnalytics.ctr = totalCTR;
       dailyAnalytics.cpc = costPerClick;
       dailyAnalytics.cpv = costPerView;
       dailyAnalytics.cpm = costPerThousandImpressions;
+      ad.isEnoughBudget = true;
       ad.score = score;
       user.balance -= dailyAnalytics.cost;
 

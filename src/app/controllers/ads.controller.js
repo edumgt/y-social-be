@@ -122,6 +122,14 @@ class AdsController {
     });
   }
 
+  /**
+   * Retrieves the ads associated with the specified user.
+   *
+   * @param {Object} req - The HTTP request object.
+   * @param {string} req.params.userId - The ID of the user whose ads should be retrieved.
+   * @param {Object} res - The HTTP response object.
+   * @returns {Promise<Object>} - The ads associated with the specified user.
+   */
   async getAdByUser(req, res) {
     await handleRequest(req, res, async () => {
       const userId = req.params.userId;
@@ -133,6 +141,14 @@ class AdsController {
     });
   }
 
+  /**
+   * Deletes all ads associated with the specified user.
+   *
+   * @param {Object} req - The HTTP request object.
+   * @param {string} req.params.userId - The ID of the user whose ads should be deleted.
+   * @param {Object} res - The HTTP response object.
+   * @returns {Promise<Object>} - The result of the deletion operation.
+   */
   async deleteAllAdByUser(req, res) {
     await handleRequest(req, res, async () => {
       const userId = req.params.userId;
@@ -140,12 +156,26 @@ class AdsController {
     });
   }
 
+  /**
+   * Retrieves the ads that are currently trending.
+   *
+   * @param {Object} req - The HTTP request object.
+   * @param {Object} res - The HTTP response object.
+   * @returns {Promise<Object>} - The ads that are currently trending.
+   */
   async getAdByTrend(req, res) {
     await handleRequest(req, res, async () => {
       return await adsService.getAdByTrend();
     });
   }
 
+  /**
+   * Retrieves the scheduling information for advertisements.
+   *
+   * @param {Object} req - The HTTP request object.
+   * @param {Object} res - The HTTP response object.
+   * @returns {Promise<Object>} - The scheduling information for advertisements.
+   */
   async getSchedulingAdvertise(req, res) {
     await handleRequest(req, res, async () => {
       const result = await adsService.getSchedulingAdvertise();
@@ -153,6 +183,14 @@ class AdsController {
     });
   }
 
+  /**
+   * Handles the processing of ad impressions for a given ad ID.
+   *
+   * @param {Object} req - The HTTP request object.
+   * @param {Object} req.params.id - The ID of the ad for which to handle impressions.
+   * @param {Object} res - The HTTP response object.
+   * @returns {Promise<Object>} - The result of the impression handling operation.
+   */
   async handleImpression(req, res) {
     rateLimitImpressions(req, res, async (err) => {
         if(!err) {
@@ -164,6 +202,14 @@ class AdsController {
     })
   }
 
+  /**
+   * Handles the processing of ad clicks for a given ad ID.
+   *
+   * @param {Object} req - The HTTP request object.
+   * @param {Object} req.params.id - The ID of the ad for which to handle clicks.
+   * @param {Object} res - The HTTP response object.
+   * @returns {Promise<Object>} - The result of the click handling operation.
+   */
   async handleClicks(req, res) {
     rateLimitClicks(req, res, async (err) => {
       if(!err) {
@@ -175,6 +221,13 @@ class AdsController {
     });
   }
 
+  /**
+   * Checks if the user's account balance is sufficient to cover the daily advertising budget.
+   *
+   * @param {Object} req - The HTTP request object.
+   * @param {Object} res - The HTTP response object.
+   * @returns {Promise<Object>} - An object containing a success message and the result of the balance check.
+   */
   async isBalanceSufficientForDailyBudget(req, res) {
     handleRequest(req, res, async () => {
       const result = await adsService.isBalanceSufficientForDailyBudget();
