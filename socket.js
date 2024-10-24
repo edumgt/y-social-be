@@ -28,7 +28,6 @@ const removeUser = (socketID) => {
 
 io.on("connection", (socket) => {
   try {
-    ColorConsole.success(`User ${socket.id} connected socket successfully :)`);
     socket.on("client", (data) => {
       console.log(data);
     });

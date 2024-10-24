@@ -2,27 +2,8 @@ const { ERRORS } = require("../constants/error");
 const { CurrencyConverter } = require("../lib/convert");
 const { adsService } = require("../services/ads.service");
 const { handleRequest } = require("../utils/handle-request");
-const { default: rateLimit } = require("express-rate-limit");
 const { userService } = require("../services/user.service");
 const { ADS_STATUS } = require("../constants/ads");
-
-const rateLimitImpressions = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 1, // Limit each IP to 1 request per hour windows
-  message: "Too many requests, please try again later",
-  handler: (req, res) => {
-    return res.status(204).send();
-  }
-});
-
-const rateLimitClicks = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 1, // Limit each IP to 1 clicks per hour
-  message: "Too many requests, please try again later.",
-  handler: (req, res) => {
-    return res.status(204).send();
-  }
-});
 
 class AdsController {
   async createAd(req, res) {
@@ -192,14 +173,10 @@ class AdsController {
    * @returns {Promise<Object>} - The result of the impression handling operation.
    */
   async handleImpression(req, res) {
-    rateLimitImpressions(req, res, async (err) => {
-        if(!err) {
-          await handleRequest(req, res, async () => {
-          const adId = req.params.id;
-          return await adsService.handleImpressions(adId);
-        });
-      }
-    })
+    await handleRequest(req, res, async () => {
+      const adId = req.params.id;
+      return await adsService.handleImpressions(adId);
+    });
   }
 
   /**
@@ -211,14 +188,10 @@ class AdsController {
    * @returns {Promise<Object>} - The result of the click handling operation.
    */
   async handleClicks(req, res) {
-    rateLimitClicks(req, res, async (err) => {
-      if(!err) {
-        await handleRequest(req, res, async () => {
-          const adId = req.params.id;
-          return await adsService.handleClicks(adId);
-        })
-      }
-    });
+    await handleRequest(req, res, async () => {
+      const adId = req.params.id;
+      return await adsService.handleClicks(adId);
+    })
   }
 
   /**
