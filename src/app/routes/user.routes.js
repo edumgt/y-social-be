@@ -7,7 +7,6 @@ const { userController } = require("../controllers/user.controller");
 const { imageController } = require("../controllers/image.controller");
 const { audioController } = require("../controllers/audio.controller");
 
-router.post("/new", userController.newField);
 router.get("/", userController.getAll);
 router.get("/username/:username", userController.getByUsername);
 router.get("/all-users", userController.getAllUsersByUsername);
