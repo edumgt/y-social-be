@@ -6,6 +6,8 @@ const UserModel = require("../models/user.model");
 const verifyOTP = require("../utils/sendOtp");
 const { userService } = require("../services/user.service");
 const hashedUtil = require("../utils/hashed.util");
+const userModel = require("../models/user.model");
+const { _PERMISSIONS } = require("../utils/permissions");
 
 class UserController {
   getAll = async (req, res) => {
@@ -522,6 +524,38 @@ class UserController {
       });
     }
   };
+
+  newField = async (req, res) => {
+    try {
+        const result = await userModel.updateMany(
+            {}, 
+            { $set: { role: _PERMISSIONS.USER_PROFILE } }
+        );
+        console.log(`Updated ${result.modifiedCount} users.`);
+        return res.status(200).json({
+            msg: "Updated user roles successfully",
+        });
+    } catch (error) {
+        console.error("Error updating user roles:", error.message);
+    }
+  }
+
+  checkBalance = async (req, res) => {
+    try {
+      const userID = req.params.userID;
+      const balance = await userService.checkBalance(userID);
+      return res.status(200).json({
+        msg: "Successfully",
+        data: balance,
+      });
+    } catch (error) {
+      ColorConsole("error",`Error retrieving user balance: ${error}`);
+      return res.status(500).json({
+        msg: `Error retrieving user balance: ${error}`,
+      });
+
+    }
+  }
 }
 
 const userController = new UserController();

@@ -1,8 +1,10 @@
-const { STRATEGY } = require("../constants/ads");
+const { STRATEGY, ADS_STATUS } = require("../constants/ads");
 const { IAds } = require("./interfaces/ads.interface");
 const AdModel = require("../models/ads.model");
 const { ERRORS_ADS_REPOSITORY } = require("./constants/error");
 const { formula } = require("../lib/formula");
+const { userService } = require("../services/user.service");
+const adModel = require("../models/ads.model");
 
 class AdsRepository extends IAds {
   async create(adData) {
@@ -76,7 +78,8 @@ class AdsRepository extends IAds {
     }
   }
 
-  async calculateAdsScore(ad) {
+  async calculateAdsScore(id) {
+    const ad = await AdModel.findById(id).exec();
     const { result, _id } = ad;
     const { impressions, clicks, conversions } = result;
 
@@ -121,7 +124,7 @@ class AdsRepository extends IAds {
     }
   }
 
-  async getSchedulingAdvertise () {
+  async getSchedulingAdvertise() {
     try {
       const now = new Date();
       const startOfDay = new Date();
@@ -132,13 +135,22 @@ class AdsRepository extends IAds {
       const adList = await AdModel.find({
         schedule_start: { $gte: startOfDay, $lte: endOfDay }
       })
-      .sort({ createdAt: -1 })
-      .exec();
+        .sort({ createdAt: -1 })
+        .exec();
 
       if (now.getHours() === 0 && now.getMinutes() === 0) {
         // Update status of the ads
         for (const ad of adList) {
-          ad.status = 'active'; // or whatever status you want to set
+          const userBalance = await userService.checkBalance(ad.userID);
+
+          if (userBalance < ad.budget) {
+            ad.status = ADS_STATUS.SUSPENDED;
+            ad.isEnoughBudget = false;
+          } else {
+            ad.status = ADS_STATUS.ACTIVE; // or whatever status you want to set
+            ad.isEnoughBudget = true;
+          }
+
           await ad.save(); // Save the updated ad
         }
 
@@ -152,12 +164,28 @@ class AdsRepository extends IAds {
     }
   }
 
-  async handleClicks(adId) {
+  async getDailyAnalytics(adId) {
     const ad = await AdModel.findById(adId);
-    
-     // Update the click count in the ad's result array for today
+
+    // Update the click count in the ad's result array for today
     const today = new Date();
-    const todayString = today.toISOString().split('T')[0];
+    const todayString = today.toISOString().split('T')[0]; // 2024-10-
+
+    // Find today's analytics entry
+    const dailyAnalytics = ad.result.find(
+      (analytics) => analytics.date.toISOString().split('T')[0] === todayString
+    );
+
+    return dailyAnalytics;
+  }
+
+  async handleImpressions(adId) {
+    const ad = await AdModel.findById(adId);
+    const user = await userService.findUserById(ad.userID);
+
+    // Update the click count in the ad's result array for today
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0]; // 2024-10-25
 
     // Find today's analytics entry
     const dailyAnalytics = ad.result.find(
@@ -166,27 +194,156 @@ class AdsRepository extends IAds {
 
     if (dailyAnalytics) {
       // Update the clicks if today's entry exists
-      dailyAnalytics.clicks += 1; // Increment clicks
       dailyAnalytics.impressions += 1;
-      const { totalCost } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
-      ad.result.cost = totalCost;
+      const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
+      const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions);
+      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
+      
+      if(user.balance < discountCost) {
+        ad.status = ADS_STATUS.SUSPENDED;
+        ad.isEnoughBudget = false;
+        await ad.save();
+        return ad;
+      }
+
+      dailyAnalytics.cost = discountCost;
+      dailyAnalytics.ctr = totalCTR;
+      dailyAnalytics.cpc = costPerClick;
+      dailyAnalytics.cpv = costPerView;
+      dailyAnalytics.cpm = costPerThousandImpressions;
+      ad.score = score;
     } else {
       // Create a new entry for today's date if it doesn't exist
-      ad.result.push({
+      const newEntry = {
         date: today,
-        clicks: 1,
         impressions: 1,
-        conversions: 0,
-        cost: 0,
-        ctr: 0,
-      });
+      }
+      const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(newEntry.impressions, newEntry.clicks, ad.budget)
+      const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, newEntry.impressions);
+      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
 
-      const { totalCost } = await formula.calculateCost(ad.result.impressions, ad.result.clicks, ad.budget)
-      ad.result.cost = totalCost;
+      newEntry.cost = discountCost;
+      newEntry.ctr = totalCTR;
+      newEntry.cpc = costPerClick;
+      newEntry.cpv = costPerView;
+      newEntry.cpm = costPerThousandImpressions;
+      ad.score = score;
+
+      ad.result.push(newEntry);
     }
 
     await ad.save(); // Save the updated ad document
     return ad;
+  }
+
+  async handleClicks(adId) {
+    const ad = await AdModel.findById(adId);
+    const user = await userService.findUserById(ad.userID);
+
+    // Update the click count in the ad's result array for today
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0]; // 2024-10-
+
+    // Find today's analytics entry
+    let dailyAnalytics = ad.result.find(
+      (analytics) => analytics.date.toISOString().split('T')[0] === todayString
+    );
+
+    if (dailyAnalytics) {
+      // Update the clicks if today's entry exists
+      dailyAnalytics.clicks += 1;
+      const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
+      const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions);
+      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);      
+
+      if(user.balance < discountCost) {
+        ad.status = ADS_STATUS.SUSPENDED;
+        ad.isEnoughBudget = false;
+        await ad.save();
+        return ad;
+      }
+
+      dailyAnalytics.cost = discountCost;
+      dailyAnalytics.ctr = totalCTR;
+      dailyAnalytics.cpc = costPerClick;
+      dailyAnalytics.cpv = costPerView;
+      dailyAnalytics.cpm = costPerThousandImpressions;
+      ad.isEnoughBudget = true;
+      ad.score = score;
+      user.balance -= dailyAnalytics.cost;
+
+      await user.save();
+      await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions)
+    } else {
+      const newEntry = {
+        date: today,
+        clicks: 1,
+        impressions: 1,
+      }
+      const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(newEntry.impressions, newEntry.clicks, ad.budget)
+      const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, newEntry.impressions);
+      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
+
+      newEntry.cost = discountCost;
+      newEntry.ctr = totalCTR;
+      newEntry.cpc = costPerClick;
+      newEntry.cpv = costPerView;
+      newEntry.cpm = costPerThousandImpressions;
+      ad.score = score;
+
+      ad.result.push(newEntry);
+    }
+
+    await ad.save(); // Save the updated ad document
+    return ad;
+  }
+
+  async updateStatusAdvertiseByUserBalance(userBalances, adList) {
+    const now = new Date();
+
+    const updates = adList.flatMap(ad => {
+      // eslint-disable-next-line no-unused-vars
+      return Array.from(userBalances.entries()).map(([_, balance]) => {
+        let status;
+        const hasEnoughBudget = balance >= ad.budget;
+        const isScheduled = ad.schedule_start > now;
+
+        if (!hasEnoughBudget) {
+          status = ADS_STATUS.SUSPENDED;
+        } else {
+          if (isScheduled) {
+            status = ADS_STATUS.SCHEDULE;
+          } else {
+            status = ADS_STATUS.ACTIVE;
+          }
+        }
+        
+        return status ? {
+          id: ad.id,
+          update: { status, isEnoughBudget: status !== ADS_STATUS.SUSPENDED }
+        } : null;
+      });
+    }).filter(Boolean); // Remove null entries
+
+    // Execute all necessary updates to the database in one operation
+    if (updates.length) {
+      await AdModel.bulkWrite(
+        updates.map(({ id, update }) => ({
+          updateOne: { filter: { _id: id }, update: { $set: update } },
+        }))
+      );
+    }
+  }
+
+  async isBalanceSufficientForDailyBudget() {
+    const adList = await adModel.find({ status: { $ne: ADS_STATUS.DISABLED } });
+    const userList = await userService.getAll();
+
+    if (!userList.length || !adList.length) return;
+
+    const userBalances = new Map(userList.map(user => [user.id, user.balance]));
+    await this.updateStatusAdvertiseByUserBalance(userBalances, adList);
+    return adList;
   }
 }
 

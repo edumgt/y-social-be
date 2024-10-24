@@ -1,19 +1,20 @@
 const { body, validationResult } = require("express-validator");
 const { adsService } = require("../services/ads.service");
 const adModel = require("../models/ads.model");
-const { MIN_BUDGET } = require("../constants/ads");
+const { MIN_BUDGET, ADS_STATUS } = require("../constants/ads");
 const { ERRORS } = require("../constants/error");
 const { default: rateLimit } = require("express-rate-limit");
+const { userService } = require("../services/user.service");
 
 const rateLimitImpressions = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5, // Limit each IP to 5 requests per hour windows
+  max: 3, // Limit each IP to 3 request per hour windows
   message: "Too many requests, please try again later",
 });
 
-const rateLimitClick = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 5, // Limit each IP to 10 clicks per minute
+const rateLimitClicks = rateLimit({
+  windowMs: 300 * 1000, // 5 minute
+  max: 2, // Limit each IP to 2 clicks per minute
   message: "Too many requests, please try again later."
 });
 
@@ -128,5 +129,5 @@ module.exports = {
   validateBudget,
   adAuthorization,
   rateLimitImpressions,
-  rateLimitClick
+  rateLimitClicks,
 };

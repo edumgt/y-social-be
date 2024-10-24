@@ -1,7 +1,7 @@
-const { formula } = require("../lib/formula");
 const {
   adsAnalyticsRepository,
 } = require("../repositories/ads-analytics.repository");
+const { userService } = require("./user.service");
 
 class AdsAnalyticsService {
   async updateDailyAnalytics() {
@@ -24,36 +24,10 @@ class AdsAnalyticsService {
         ad.schedule_start <= today &&
         (ad.schedule_end ? today <= ad.schedule_end : true)
       ) {
-        const impressions = this.calculateImpressions();
-        const clicks = this.calculateClicks();
-        const conversions = this.calculateConversions();
-        const ctr = formula.calculateCTR(clicks, impressions);
-        const cost = (impressions * ctr * conversions * ad.budget) / 100;
-
-        ad.result.push({
-          date: today,
-          impressions,
-          clicks,
-          conversions,
-          ctr,
-          cost,
-        });
-
-        await ad.save();
+        const user = await userService.findUserById(ad.userID);
+        user.balance -= ad.cost;
       }
     }
-  }
-
-  calculateImpressions() {
-    return Math.floor(Math.random() * 1000); // Replace with actual logic
-  }
-
-  calculateClicks() {
-    return Math.floor(Math.random() * 100); // Replace with actual logic
-  }
-
-  calculateConversions() {
-    return Math.floor(Math.random() * 10); // Replace with actual logic
   }
 }
 

@@ -1,5 +1,6 @@
 const app = require("./app");
 const { Server } = require("socket.io");
+const ColorConsole = require("./src/app/lib/color-console");
 const httpServer = require("http").createServer(app);
 require("dotenv").config();
 
@@ -27,7 +28,6 @@ const removeUser = (socketID) => {
 
 io.on("connection", (socket) => {
   try {
-    console.log(`User connected: ${socket.id} successfully :D`);
     socket.on("client", (data) => {
       console.log(data);
     });
@@ -121,7 +121,7 @@ io.on("connection", (socket) => {
       console.log(`User ${socket.id} disconnected`);
     });
   } catch (error) {
-    console.error("User cannot connected: ", error);
+    ColorConsole.error("User connected socket failed :( : ", error);
   }
 });
 

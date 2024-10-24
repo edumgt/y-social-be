@@ -49,6 +49,7 @@ router.put(
   userMiddleware.validateUserById,
   userController.followUser,
 );
+router.post("/check-balance/:userID", userMiddleware.validateUserById, userController.checkBalance)
 
 router.delete("/delete-all", userController.deleteAllUsers);
 router.delete(

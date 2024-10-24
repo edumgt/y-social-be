@@ -38,6 +38,10 @@ class UserService {
   updateBalance = async (userId, paymentId, amount) => {
     return await userRepository.updateBalance(userId, paymentId, amount);
   };
+
+  checkBalance = async (userId) => {
+    return await userRepository.checkBalance(userId);
+  }
 }
 
 const userService = new UserService();

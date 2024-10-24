@@ -18,14 +18,31 @@ const dailyAdAnalyticsSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    // cost per day
     cost: {
       type: Number,
       default: 0,
     },
+    // conversion rate (click through rate)
     ctr: {
       type: Number,
       default: 0,
     },
+    // cost per view
+    cpv: {
+      type: Number,
+      default: 0,
+    },
+    // cost per clicks
+    cpc: {
+      type: Number,
+      default: 0,
+    },
+    // cost per miles (per 1000 impressions)
+    cpm: {
+      type: Number,
+      default: 0,
+    }
   },
   { _id: false },
 );
@@ -102,7 +119,7 @@ const adsSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["active", "schedule", "disabled"],
+      enum: ["active", "schedule", "disabled", "suspended", "in_review"],
       default: "active",
     },
     goal: {
@@ -112,11 +129,17 @@ const adsSchema = new mongoose.Schema(
     adTargetAudience: {
       type: targetAudienceSchema,
     },
+    isEnoughBudget: {
+      type: Boolean,
+      default: true,
+    },
     result: [dailyAdAnalyticsSchema],
     score: {
       type: Number,
       required: true,
       default: 0,
+      min: 0,
+      max: 100,
     },
   },
   { timestamps: true },

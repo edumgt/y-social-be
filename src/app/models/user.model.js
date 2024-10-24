@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
 const mongoose = require("mongoose");
+const { _PERMISSIONS } = require("../utils/permissions");
 require("dotenv").config();
 
 mongoose.set("strictQuery", false);
@@ -42,7 +43,6 @@ const blackList = new mongoose.Schema(
 const payment = new mongoose.Schema({
   paymentId: {
     type: String,
-    required: true,
   },
 });
 
@@ -141,6 +141,11 @@ const User = new Schema(
     balance: {
       type: Number,
       default: 0,
+    },
+    role: {
+      type: Number,
+      default: _PERMISSIONS.USER_PROFILE,
+      enum: _PERMISSIONS
     },
     postShared: [postShared],
     blackList: [blackList],

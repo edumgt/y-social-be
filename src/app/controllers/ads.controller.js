@@ -2,31 +2,30 @@ const { ERRORS } = require("../constants/error");
 const { CurrencyConverter } = require("../lib/convert");
 const { adsService } = require("../services/ads.service");
 const { handleRequest } = require("../utils/handle-request");
+const { userService } = require("../services/user.service");
+const { ADS_STATUS } = require("../constants/ads");
 
 class AdsController {
-  constructor() {
-    this.clicks = {};
-    this.impressions = {};
-    this.clickRateLimit = 5; // Allow 5 clicks per hour
-    this.impressionRateLimit = 10; // Allow 10 impressions per hour
-  }
-
-
   async createAd(req, res) {
     await handleRequest(req, res, async () => {
-      const { schedule_start, ...body } = req.body;
+      const { schedule_start, budget, userID } = req.body;
+      const userBalance = await userService.checkBalance(userID)
 
-      // Initialize adData
       const adData = {
-        userID: req.userId,
+        userID,
         link_action: "https://i.pinimg.com/enabled_hi/564x/cd/aa/56/cdaa5630b421cb002ba19ce817e8e80c.jpg",
-        ...body,
+        ...req.body,
         schedule_start: schedule_start ? new Date(schedule_start) : new Date(),
       };
 
       // Compare schedule_start with the current date
       if (adData.schedule_start < new Date()) {
-        adData.status = "schedule";
+        adData.status = ADS_STATUS.SCHEDULE;
+      }
+
+      if(userBalance < budget) {
+        adData.status = ADS_STATUS.SUSPENDED;
+        adData.isEnoughBudget = false;
       }
 
       // Set schedule_start to today's date if not provided
@@ -43,6 +42,7 @@ class AdsController {
         },
       ];
       adData.result = InitializeResult;
+
       return await adsService.createAd(adData);
     });
   }
@@ -103,6 +103,14 @@ class AdsController {
     });
   }
 
+  /**
+   * Retrieves the ads associated with the specified user.
+   *
+   * @param {Object} req - The HTTP request object.
+   * @param {string} req.params.userId - The ID of the user whose ads should be retrieved.
+   * @param {Object} res - The HTTP response object.
+   * @returns {Promise<Object>} - The ads associated with the specified user.
+   */
   async getAdByUser(req, res) {
     await handleRequest(req, res, async () => {
       const userId = req.params.userId;
@@ -114,6 +122,14 @@ class AdsController {
     });
   }
 
+  /**
+   * Deletes all ads associated with the specified user.
+   *
+   * @param {Object} req - The HTTP request object.
+   * @param {string} req.params.userId - The ID of the user whose ads should be deleted.
+   * @param {Object} res - The HTTP response object.
+   * @returns {Promise<Object>} - The result of the deletion operation.
+   */
   async deleteAllAdByUser(req, res) {
     await handleRequest(req, res, async () => {
       const userId = req.params.userId;
@@ -121,12 +137,26 @@ class AdsController {
     });
   }
 
+  /**
+   * Retrieves the ads that are currently trending.
+   *
+   * @param {Object} req - The HTTP request object.
+   * @param {Object} res - The HTTP response object.
+   * @returns {Promise<Object>} - The ads that are currently trending.
+   */
   async getAdByTrend(req, res) {
     await handleRequest(req, res, async () => {
       return await adsService.getAdByTrend();
     });
   }
 
+  /**
+   * Retrieves the scheduling information for advertisements.
+   *
+   * @param {Object} req - The HTTP request object.
+   * @param {Object} res - The HTTP response object.
+   * @returns {Promise<Object>} - The scheduling information for advertisements.
+   */
   async getSchedulingAdvertise(req, res) {
     await handleRequest(req, res, async () => {
       const result = await adsService.getSchedulingAdvertise();
@@ -134,52 +164,52 @@ class AdsController {
     });
   }
 
-  async handleClick(req, res) {
-    const adId = req.params.id;
-    const userId = req.userId;
-    const now = Date.now();
-
-    // Rate limiting logic for clicks
-    if (!this.clicks[userId]) this.clicks[userId] = {};
-    if (!this.clicks[userId][adId]) this.clicks[userId][adId] = { count: 0, lastTimestamp: 0 };
-
-    const userClickData = this.clicks[userId][adId];
-    if (now - userClickData.lastTimestamp < 3600000 && userClickData.count >= this.clickRateLimit) {
-      return res.status(429).send({ message: "Too many clicks. Please try again later." });
-    }
-
-    userClickData.count += 1;
-    userClickData.lastTimestamp = now;
-
-    await adsService.recordClick(adId); // Call service to record click
-    return res.status(200).send({ message: "Click recorded." });
-  }
-
+  /**
+   * Handles the processing of ad impressions for a given ad ID.
+   *
+   * @param {Object} req - The HTTP request object.
+   * @param {Object} req.params.id - The ID of the ad for which to handle impressions.
+   * @param {Object} res - The HTTP response object.
+   * @returns {Promise<Object>} - The result of the impression handling operation.
+   */
   async handleImpression(req, res) {
-    const adId = req.params.id;
-    const userId = req.userId;
-    const now = Date.now();
-
-    // Rate limiting logic for impressions
-    if (!this.impressions[userId]) this.impressions[userId] = {};
-    if (!this.impressions[userId][adId]) this.impressions[userId][adId] = { count: 0, lastTimestamp: 0 };
-
-    const userImpressionData = this.impressions[userId][adId];
-    if (now - userImpressionData.lastTimestamp < 3600000 && userImpressionData.count >= this.impressionRateLimit) {
-      return res.status(429).send({ message: "Too many impressions. Please try again later." });
-    }
-
-    userImpressionData.count += 1;
-    userImpressionData.lastTimestamp = now;
-
-    await adsService.recordImpression(adId); // Call service to record impression
-    return res.status(200).send({ message: "Impression recorded." });
+    await handleRequest(req, res, async () => {
+      const adId = req.params.id;
+      return await adsService.handleImpressions(adId);
+    });
   }
 
+  /**
+   * Handles the processing of ad clicks for a given ad ID.
+   *
+   * @param {Object} req - The HTTP request object.
+   * @param {Object} req.params.id - The ID of the ad for which to handle clicks.
+   * @param {Object} res - The HTTP response object.
+   * @returns {Promise<Object>} - The result of the click handling operation.
+   */
   async handleClicks(req, res) {
     await handleRequest(req, res, async () => {
       const adId = req.params.id;
       return await adsService.handleClicks(adId);
+    })
+  }
+
+  /**
+   * Checks if the user's account balance is sufficient to cover the daily advertising budget.
+   *
+   * @param {Object} req - The HTTP request object.
+   * @param {Object} res - The HTTP response object.
+   * @returns {Promise<Object>} - An object containing a success message and the result of the balance check.
+   */
+  async isBalanceSufficientForDailyBudget(req, res) {
+    handleRequest(req, res, async () => {
+      const result = await adsService.isBalanceSufficientForDailyBudget();
+      return res.status(200).json(
+        {
+          message: "Successfully",
+          data: result
+        }
+      );
     })
   }
 }

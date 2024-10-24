@@ -66,6 +66,26 @@ class IAdsService {
       `${ERRORS.NOT_IMPLEMENTED}: getAdByTrend() method is not implemented.`,
     );
   }
+
+  async getSchedulingAdvertise() {
+    throw new Error(
+      `${ERRORS.NOT_IMPLEMENTED}: getSchedulingAdvertise() method is not implemented.`,
+    );
+  }
+
+  async handleClicks(adId) {
+    throw new Error(
+      `${ERRORS.NOT_IMPLEMENTED}: handleClicks(adId) method is not implemented.`,
+      adId,
+    );
+  }
+
+  async handeImressions(adId) {
+    throw new Error(
+      `${ERRORS.NOT_IMPLEMENTED}: handeImressions(adId) method is not implemented.`,
+      adId,
+    );
+  }
 }
 
 module.exports = { IAdsService };

@@ -1,7 +1,10 @@
 require("./avoid-render-sleep");
 const scheduleStartAdvertise = require("./scheduler-start-advertise");
 const scheduleSyncNewPayment = require("./scheduler-sync-new-payment");
-// require("./scheduler-update-advertise-anaylytics");
+const scheduleCheckUserBudget = require("./schedule-check-user-budget");
+const schedulerUpdateAdvertiseAnaylytics = require("./scheduler-update-advertise-anaylytics");
 
-scheduleStartAdvertise.start();
 scheduleSyncNewPayment.start();
+scheduleCheckUserBudget.start();
+scheduleStartAdvertise.start();
+schedulerUpdateAdvertiseAnaylytics.start();

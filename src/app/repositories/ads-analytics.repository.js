@@ -3,7 +3,7 @@ const AdsModel = require("../models/ads.model");
 
 class AdsAnalyticsRepository extends IAdsAnalytics {
   async findAllAds() {
-    return await AdsModel.find();
+    return await AdsModel.find({});
   }
 
   async saveAd(ad) {
