@@ -231,6 +231,7 @@ class AdsRepository extends IAds {
 
   async handleClicks(adId) {
     const ad = await AdModel.findById(adId);
+    const user = await userService.findUserById(ad.userID);
 
     // Update the click count in the ad's result array for today
     const today = new Date();
@@ -254,7 +255,9 @@ class AdsRepository extends IAds {
       dailyAnalytics.cpv = costPerView;
       dailyAnalytics.cpm = costPerThousandImpressions;
       ad.score = score;
+      user.balance -= dailyAnalytics.cost;
 
+      await user.save();
       await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions)
     } else {
       const newEntry = {

@@ -43,7 +43,6 @@ const blackList = new mongoose.Schema(
 const payment = new mongoose.Schema({
   paymentId: {
     type: String,
-    required: true,
   },
 });
 

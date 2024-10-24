@@ -8,7 +8,7 @@ const { ADS_STATUS } = require("../constants/ads");
 
 const rateLimitImpressions = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 3, // Limit each IP to 3 request per hour windows
+  max: 1, // Limit each IP to 1 request per hour windows
   message: "Too many requests, please try again later",
   handler: (req, res) => {
     return res.status(204).send();
@@ -16,8 +16,8 @@ const rateLimitImpressions = rateLimit({
 });
 
 const rateLimitClicks = rateLimit({
-  windowMs: 300 * 1000, // 5 minute
-  max: 2, // Limit each IP to 2 clicks per minute
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 1, // Limit each IP to 1 clicks per hour
   message: "Too many requests, please try again later.",
   handler: (req, res) => {
     return res.status(204).send();
@@ -158,7 +158,7 @@ class AdsController {
         if(!err) {
           await handleRequest(req, res, async () => {
           const adId = req.params.id;
-          return await adsService.handleClicks(adId);
+          return await adsService.handleImpressions(adId);
         });
       }
     })

@@ -11,7 +11,7 @@ const reloadWebsite = async () => {
     try {
         ColorConsole.info(`Bắt đầu chặn server ngủ...`);
         await axios.get(url);
-        ColorConsole.success(`ĐÃ chặn server ngủ`);
+        ColorConsole.success(`Đã chặn server ngủ`);
     } catch (error) {
         ColorConsole.error(`Lỗi chặn server ngủ: ${error}`);
     }
