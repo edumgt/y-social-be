@@ -198,8 +198,8 @@ class AdsRepository extends IAds {
       const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
       const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions);
       const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
-      
-      if(user.balance < discountCost) {
+
+      if (user.balance < discountCost) {
         ad.status = ADS_STATUS.SUSPENDED;
         ad.isEnoughBudget = false;
         await ad.save();
@@ -254,9 +254,9 @@ class AdsRepository extends IAds {
       dailyAnalytics.clicks += 1;
       const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
       const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, dailyAnalytics.impressions);
-      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);      
+      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
 
-      if(user.balance < discountCost) {
+      if (user.balance < discountCost) {
         ad.status = ADS_STATUS.SUSPENDED;
         ad.isEnoughBudget = false;
         await ad.save();
@@ -298,30 +298,33 @@ class AdsRepository extends IAds {
     return ad;
   }
 
-  async updateStatusAdvertiseByUserBalance(userBalances, adList) {
+  async updateStatusAdvertiseByUserBalance(userInfo, adList) {
     const now = new Date();
-
     const updates = adList.flatMap(ad => {
       // eslint-disable-next-line no-unused-vars
-      return Array.from(userBalances.entries()).map(([_, balance]) => {
-        let status;
-        const hasEnoughBudget = balance >= ad.budget;
-        const isScheduled = ad.schedule_start > now;
+      return Array.from(userInfo.entries()).map(([userID, balance]) => {
+        if (ad.userID === userID) {
+          let status;
+          const hasEnoughBudget = balance >= ad.budget;
+          const isScheduled = ad.schedule_start > now;
 
-        if (!hasEnoughBudget) {
-          status = ADS_STATUS.SUSPENDED;
-        } else {
-          if (isScheduled) {
-            status = ADS_STATUS.SCHEDULE;
+          if (!hasEnoughBudget) {
+            status = ADS_STATUS.SUSPENDED;
           } else {
-            status = ADS_STATUS.ACTIVE;
+            if (isScheduled) {
+              status = ADS_STATUS.SCHEDULE;
+            } else {
+              status = ADS_STATUS.ACTIVE;
+            }
           }
+
+          return status ? {
+            id: ad.id,
+            update: { status, isEnoughBudget: hasEnoughBudget }
+          } : null;
         }
-        
-        return status ? {
-          id: ad.id,
-          update: { status, isEnoughBudget: status !== ADS_STATUS.SUSPENDED }
-        } : null;
+
+        return;
       });
     }).filter(Boolean); // Remove null entries
 
@@ -341,8 +344,8 @@ class AdsRepository extends IAds {
 
     if (!userList.length || !adList.length) return;
 
-    const userBalances = new Map(userList.map(user => [user.id, user.balance]));
-    await this.updateStatusAdvertiseByUserBalance(userBalances, adList);
+    const userInfo = new Map(userList.map(user => [user.id, user.balance]));
+    await this.updateStatusAdvertiseByUserBalance(userInfo, adList);
     return adList;
   }
 }
