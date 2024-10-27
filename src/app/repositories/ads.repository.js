@@ -300,6 +300,11 @@ class AdsRepository extends IAds {
 
   async updateStatusAdvertiseByUserBalance(userInfo, adList) {
     const now = new Date();
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setHours(23, 59, 59, 999);
+
     const updates = adList.flatMap(ad => {
       // eslint-disable-next-line no-unused-vars
       return Array.from(userInfo.entries()).map(([userID, balance]) => {
@@ -313,7 +318,7 @@ class AdsRepository extends IAds {
           } else {
             if (isScheduled) {
               status = ADS_STATUS.SCHEDULE;
-            } else {
+            } else if(ad.schedule_start === now) {
               status = ADS_STATUS.ACTIVE;
             }
           }

@@ -65,6 +65,7 @@ class UserMiddleware {
 
     try {
       const validUser = await User.findById(userID);
+      
       // Check if the user ID is valid
       if (!validUser) {
         console.error(`Invalid user ID`);

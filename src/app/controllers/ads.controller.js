@@ -116,7 +116,7 @@ class AdsController {
       const userId = req.params.userId;
       const ads = await adsService.getAdByUser(userId);
       if (!ads.length) {
-        throw new Error(ERRORS.NOT_FOUND);
+        return [];
       }
       return ads;
     });
