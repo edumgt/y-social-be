@@ -83,7 +83,7 @@ class AdsService extends IAdsService {
     try {
       const ads = await adsRepository.findByUser(userId);
       if (!ads.length) {
-        throw new Error(ERRORS.NOT_FOUND);
+        return [];
       }
       return ads;
     } catch (error) {

@@ -40,7 +40,7 @@ router.put(
 router.post("/create", validateAdCreation, adsController.createAd);
 router.post("/:id/impressions", validateAds, rateLimitImpressions, adsController.handleImpression);
 router.post("/:id/clicks", validateAds, rateLimitClicks, adsController.handleClicks);
-router.get("/user/:userId", validateAds, adsController.getAdByUser);
+router.get("/user/:userId", adsController.getAdByUser);
 router.get("/trending", adsController.getAdByTrend);
 router.get("/get-all", adsController.getAllAds);
 router.get("/scheduling", adsController.getSchedulingAdvertise);
