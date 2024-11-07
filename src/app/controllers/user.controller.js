@@ -191,6 +191,7 @@ class UserController {
         isVerify,
         isVerifyEmail,
         borderAvatar,
+        role,
         // Social links
         insta,
         linkedin,
@@ -213,6 +214,7 @@ class UserController {
       user.isVerify = isVerify || false;
       user.isVerifyEmail = isVerifyEmail;
       user.borderAvatar = borderAvatar || user.borderAvatar;
+      user.role = role || user.role;
 
       if (
         insta ||
