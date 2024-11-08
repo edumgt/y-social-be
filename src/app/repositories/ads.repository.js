@@ -127,37 +127,40 @@ class AdsRepository extends IAds {
   async getSchedulingAdvertise() {
     try {
       const now = new Date();
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(startOfDay);
-      endOfDay.setHours(23, 59, 59, 999); // End of the day
+      const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(now.setHours(23, 59, 59, 999));
 
-      const adList = await AdModel.find({
-        schedule_start: { $gte: startOfDay, $lte: endOfDay }
-      })
+      const adList = await AdModel.find({})
         .sort({ createdAt: -1 })
         .exec();
 
-      if (now.getHours() === 0 && now.getMinutes() === 0) {
-        // Update status of the ads
-        for (const ad of adList) {
-          const userBalance = await userService.checkBalance(ad.userID);
+      for (const ad of adList) {
+        const userBalance = await userService.checkBalance(ad.userID);
+        let isEnoughBudget, status;
 
           if (userBalance < ad.budget) {
             ad.status = ADS_STATUS.SUSPENDED;
             ad.isEnoughBudget = false;
           } else {
-            ad.status = ADS_STATUS.ACTIVE; // or whatever status you want to set
-            ad.isEnoughBudget = true;
+            isEnoughBudget = true;
+            if (ad.schedule_start <= now && ad.schedule_end >= now) {
+              status = ADS_STATUS.ACTIVE;
+            } else if (ad.schedule_start >= startOfDay && ad.schedule_start <= endOfDay) {
+              status = ADS_STATUS.SCHEDULE;
+            } else {
+              status = ADS_STATUS.DISABLED;
+            }
           }
 
-          await ad.save(); // Save the updated ad
+          return {
+            updateOne: {
+              filter: { _id: ad._id },
+              update: { $set: { status, isEnoughBudget } }
+            }
+          };
         }
 
-        return adList; // Return the updated ad list if needed
-      }
-
-      return adList;
+        return adList;
     } catch (error) {
       console.error(ERRORS_ADS_REPOSITORY.SCHEDULLING_ADS, error.message);
       throw error;
@@ -306,7 +309,7 @@ class AdsRepository extends IAds {
     endOfDay.setHours(23, 59, 59, 999);
 
     const updates = adList.flatMap(ad => {
-      // eslint-disable-next-line no-unused-vars
+       
       return Array.from(userInfo.entries()).map(([userID, balance]) => {
         if (ad.userID === userID) {
           let status;
