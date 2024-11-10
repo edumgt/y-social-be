@@ -13,13 +13,13 @@ class AdsController {
 
       const adData = {
         userID,
-        link_action: "https://i.pinimg.com/enabled_hi/564x/cd/aa/56/cdaa5630b421cb002ba19ce817e8e80c.jpg",
         ...req.body,
         schedule_start: schedule_start ? new Date(schedule_start) : new Date(),
+        status: ADS_STATUS.ACTIVE
       };
 
-      // Compare schedule_start with the current date
-      if (adData.schedule_start < new Date()) {
+       // Set to SCHEDULE if start date is in the future
+      if (adData.schedule_start > new Date()) {
         adData.status = ADS_STATUS.SCHEDULE;
       }
 
