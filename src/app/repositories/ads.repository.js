@@ -138,7 +138,7 @@ class AdsRepository extends IAds {
           const userBalance = await userService.checkBalance(ad.userID);
           let isEnoughBudget, status;
           const scheduleStartDay = new Date(ad.schedule_start);
-          scheduleStartDay.setHours(0, 0, 0, 0);
+          scheduleStartDay.setHours(23, 59, 59, 999);
 
           if (userBalance < ad.budget) {
             ad.status = ADS_STATUS.SUSPENDED;
@@ -146,7 +146,7 @@ class AdsRepository extends IAds {
           } else {
             isEnoughBudget = true;
             if (ad.schedule_start <= now && ad.schedule_end >= now 
-              && scheduleStartDay.getTime() === startOfDay.getTime()) {
+              && scheduleStartDay.getTime() === endOfDay.getTime()) {
               status = ADS_STATUS.ACTIVE;
             } else if (ad.schedule_start > now && ad.schedule_start >= startOfDay) {
               status = ADS_STATUS.SCHEDULE;
