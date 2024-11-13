@@ -1,6 +1,7 @@
 const {
   adsAnalyticsRepository,
 } = require("../repositories/ads-analytics.repository");
+const { adsRepository } = require("../repositories/ads.repository");
 const { userService } = require("./user.service");
 
 class AdsAnalyticsService {
@@ -28,6 +29,8 @@ class AdsAnalyticsService {
         user.balance -= ad.cost;
       }
     }
+
+    await adsRepository.getSchedulingAdvertise();
   }
 }
 
