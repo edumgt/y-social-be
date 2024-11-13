@@ -83,7 +83,6 @@ class AdsRepository extends IAds {
     const { result, _id } = ad;
     const { impressions, clicks, conversions } = result;
 
-    // Await asynchronous methods
     const totalInteractions = await formula.calculateTotalInteractions(_id);
     const totalCost = await formula.calculateTotalCost(_id);
     const scores = formula.calculateTrendingScore(
@@ -128,15 +127,16 @@ class AdsRepository extends IAds {
     try {
       const now = new Date();
       const startOfDay = new Date(now.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(now.setHours(23, 59, 59, 999));
+      const endOfDay = new Date(now.setHours(23, 59, 59, 999));
 
       const adList = await AdModel.find({})
         .sort({ createdAt: -1 })
         .exec();
 
-      for (const ad of adList) {
-        const userBalance = await userService.checkBalance(ad.userID);
-        let isEnoughBudget, status;
+      const bulkOps = await Promise.all(
+        adList.map(async (ad) => {
+          const userBalance = await userService.checkBalance(ad.userID);
+          let isEnoughBudget, status;
 
           if (userBalance < ad.budget) {
             ad.status = ADS_STATUS.SUSPENDED;
@@ -145,9 +145,9 @@ class AdsRepository extends IAds {
             isEnoughBudget = true;
             if (ad.schedule_start <= now && ad.schedule_end >= now) {
               status = ADS_STATUS.ACTIVE;
-            } else if (ad.schedule_start >= startOfDay && ad.schedule_start <= endOfDay) {
+            } else if (ad.schedule_start > now && ad.schedule_start >= startOfDay && ad.schedule_start <= endOfDay) {
               status = ADS_STATUS.SCHEDULE;
-            } else {
+            } else if (ad.schedule_end < now) {
               status = ADS_STATUS.DISABLED;
             }
           }
@@ -158,9 +158,14 @@ class AdsRepository extends IAds {
               update: { $set: { status, isEnoughBudget } }
             }
           };
-        }
+        })
+      );
 
-        return adList;
+      if (bulkOps.length > 0) {
+        await AdModel.bulkWrite(bulkOps);
+      }
+
+      return adList;
     } catch (error) {
       console.error(ERRORS_ADS_REPOSITORY.SCHEDULLING_ADS, error.message);
       throw error;
@@ -309,7 +314,6 @@ class AdsRepository extends IAds {
     endOfDay.setHours(23, 59, 59, 999);
 
     const updates = adList.flatMap(ad => {
-       
       return Array.from(userInfo.entries()).map(([userID, balance]) => {
         if (ad.userID === userID) {
           let status;
