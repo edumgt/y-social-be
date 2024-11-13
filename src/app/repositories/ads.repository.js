@@ -137,15 +137,18 @@ class AdsRepository extends IAds {
         adList.map(async (ad) => {
           const userBalance = await userService.checkBalance(ad.userID);
           let isEnoughBudget, status;
+          const scheduleStartDay = new Date(ad.schedule_start);
+          scheduleStartDay.setHours(23, 59, 59, 999);
 
           if (userBalance < ad.budget) {
             ad.status = ADS_STATUS.SUSPENDED;
             ad.isEnoughBudget = false;
           } else {
             isEnoughBudget = true;
-            if (ad.schedule_start <= now && ad.schedule_end >= now) {
+            if (ad.schedule_start <= now && ad.schedule_end >= now 
+              && scheduleStartDay.getTime() === endOfDay.getTime()) {
               status = ADS_STATUS.ACTIVE;
-            } else if (ad.schedule_start > now && ad.schedule_start >= startOfDay && ad.schedule_start <= endOfDay) {
+            } else if (ad.schedule_start > now && ad.schedule_start >= startOfDay) {
               status = ADS_STATUS.SCHEDULE;
             } else if (ad.schedule_end < now) {
               status = ADS_STATUS.DISABLED;
