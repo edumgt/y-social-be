@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 const mongoose = require("mongoose");
 const { _PERMISSIONS } = require("../utils/permissions");
+const { _HOBBIE_LIST } = require("./constants");
 require("dotenv").config();
 
 mongoose.set("strictQuery", false);
@@ -146,6 +147,11 @@ const User = new Schema(
       type: Number,
       default: _PERMISSIONS.USER_PROFILE,
       enum: _PERMISSIONS
+    },
+    hobbies: {
+      type: String,
+      default: _HOBBIE_LIST.SPORTS,
+      enum: _HOBBIE_LIST,
     },
     postShared: [postShared],
     blackList: [blackList],

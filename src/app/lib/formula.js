@@ -163,7 +163,8 @@ class Formula extends IFormula {
   // a different campaign targeted at a niche audience.
   // visit: https://adcalculators.com/cpc-cost-per-click-calculator/ to know more
   calculateCPC(budget, totalClicks) {
-    if (totalClicks <= 0 && budget <= 0 || totalClicks <= 0 || isNaN(budget) || isNaN(totalClicks)) return 0;
+    if (totalClicks <= 0 && budget <= 0 || totalClicks <= 0 || isNaN(budget) || isNaN(totalClicks)) 
+      return 0;
     const result = Math.round(budget / totalClicks);
     const MAX_COST_PER_CLICK = 15000;
     return Math.min(result, MAX_COST_PER_CLICK);

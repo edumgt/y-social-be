@@ -9,13 +9,14 @@ class UserService {
     return await userRepository.getAll();
   };
 
-  createUser = async (username, password, email) => {
+  createUser = async (username, password, email, hobbies) => {
     const hashedPassword = await hashedUtil.saltHash(password);
 
     const user = UserModel.create({
       username,
       password: hashedPassword,
       email,
+      hobbies: hobbies,
     });
 
     return user;
