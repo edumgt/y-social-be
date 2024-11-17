@@ -8,6 +8,7 @@ const { userService } = require("../services/user.service");
 const hashedUtil = require("../utils/hashed.util");
 const userModel = require("../models/user.model");
 const { _PERMISSIONS } = require("../utils/permissions");
+const { _HOBBIE_LIST } = require("../models/constants");
 
 class UserController {
   getAll = async (req, res) => {
@@ -34,6 +35,7 @@ class UserController {
         password,
         email,
         code.otpCode,
+        _HOBBIE_LIST.SPORTS,
       );
 
       return res.status(200).json({
@@ -94,9 +96,9 @@ class UserController {
         const users =
           limit || skip
             ? await UserModel.find({})
-                .sort({ createdAt: -1 })
-                .limit(limit)
-                .skip(skip)
+              .sort({ createdAt: -1 })
+              .limit(limit)
+              .skip(skip)
             : allUsers;
 
         return res.status(200).json({
@@ -200,6 +202,7 @@ class UserController {
         youtube,
         twitter,
         twitch,
+        hobbies,
       } = req.body;
       const user = await UserModel.findById(userID);
 
@@ -215,40 +218,27 @@ class UserController {
       user.isVerifyEmail = isVerifyEmail;
       user.borderAvatar = borderAvatar || user.borderAvatar;
       user.role = role || user.role;
+      user.hobbies = hobbies || user.hobbies;
 
-      if (
-        insta ||
-        linkedin ||
-        github ||
-        pinterest ||
-        youtube ||
-        twitter ||
-        twitch
-      ) {
-        const socialLinks = {
-          insta: this.validateSocialLink(insta, "Instagram"),
-          linkedin: this.validateSocialLink(linkedin, "LinkedIn"),
-          github: this.validateSocialLink(github, "GitHub"),
-          pinterest: this.validateSocialLink(pinterest, "Pinterest"),
-          youtube: this.validateSocialLink(youtube, "YouTube"),
-          twitter: this.validateSocialLink(twitter, "Twitter"),
-          twitch: this.validateSocialLink(twitch, "Twitch"),
-        };
+      const socialLinks = {
+        insta: this.validateSocialLink(insta, "Instagram"),
+        linkedin: this.validateSocialLink(linkedin, "LinkedIn"),
+        github: this.validateSocialLink(github, "GitHub"),
+        pinterest: this.validateSocialLink(pinterest, "Pinterest"),
+        youtube: this.validateSocialLink(youtube, "YouTube"),
+        twitter: this.validateSocialLink(twitter, "Twitter"),
+        twitch: this.validateSocialLink(twitch, "Twitch"),
+      };
 
-        Object.keys(socialLinks).forEach((key) => {
-          const { isValid, value, error } = socialLinks[key];
-          if (!isValid) {
-            return res.status(500).json({ msg: error });
-          }
+      Object.keys(socialLinks).forEach((key) => {
+        const { isValid, value, error } = socialLinks[key];
+        if (!isValid) {
+          return res.status(500).json({ msg: error });
+        }
 
-          // if new username of social link is flank will set to empty string
-          if (value?.length === 0) {
-            user[key] = "";
-          } else {
-            user[key] = value || user[key];
-          }
-        });
-      }
+        // Set user[key] to the value, handling empty strings correctly
+        user[key] = value !== undefined ? value : user[key];
+      });
 
       if (bio?.length > 50) {
         return res.status(500).json({
@@ -529,16 +519,16 @@ class UserController {
 
   newField = async (req, res) => {
     try {
-        const result = await userModel.updateMany(
-            {}, 
-            { $set: { role: _PERMISSIONS.USER_PROFILE } }
-        );
-        console.log(`Updated ${result.modifiedCount} users.`);
-        return res.status(200).json({
-            msg: "Updated user roles successfully",
-        });
+      const result = await userModel.updateMany(
+        {},
+        { $set: { hobbies: _HOBBIE_LIST.SPORTS } }
+      );
+      console.log(`Updated ${result.modifiedCount} users.`);
+      return res.status(200).json({
+        msg: "Add new field successfully",
+      });
     } catch (error) {
-        console.error("Error updating user roles:", error.message);
+      console.error("Error add new field:", error.message);
     }
   }
 
@@ -551,7 +541,7 @@ class UserController {
         data: balance,
       });
     } catch (error) {
-      ColorConsole("error",`Error retrieving user balance: ${error}`);
+      ColorConsole("error", `Error retrieving user balance: ${error}`);
       return res.status(500).json({
         msg: `Error retrieving user balance: ${error}`,
       });
