@@ -27,7 +27,7 @@ class Formula extends IFormula {
   async calculateCost(impressions, clicks, budget) {
     try {
       const costPerThousandImpressions = this.calculateCPM(budget, impressions) ;
-      const costPerClick = this.calculateCPC(budget, clicks) 
+      const costPerClick = this.calculateCPC(budget, clicks, impressions) 
       const costFromImpressions = this.calculateCFI(clicks, impressions, costPerThousandImpressions);
       const costFromClicks = this.calculateCostFromClicks(clicks, costPerClick);;
       const totalCTR = this.calculateCTR(clicks, impressions);
@@ -125,7 +125,7 @@ class Formula extends IFormula {
   async calculateTotalInteractions(adId) {
     try {
       const ad = await AdModel.findById(adId).exec();
-
+      
       if (!ad) {
         throw new Error(ERRORS.NOT_FOUND);
       }
@@ -162,12 +162,13 @@ class Formula extends IFormula {
   // One campaign—targeted at a broader audience—could have a much lower CPC than 
   // a different campaign targeted at a niche audience.
   // visit: https://adcalculators.com/cpc-cost-per-click-calculator/ to know more
-  calculateCPC(budget, totalClicks) {
-    if (totalClicks <= 0 && budget <= 0 || totalClicks <= 0 || isNaN(budget) || isNaN(totalClicks)) 
+  calculateCPC(budget, totalClicks, impressions) {
+    if (totalClicks <= 0 && budget <= 0 || totalClicks <= 0 || isNaN(budget) || isNaN(totalClicks) || isNaN(impressions)) 
       return 0;
     const result = Math.round(budget / totalClicks);
+    const effectiveCPC = (result * (totalClicks / impressions)).toFixed(2);
     const MAX_COST_PER_CLICK = 15000;
-    return Math.min(result, MAX_COST_PER_CLICK);
+    return Math.min(effectiveCPC, MAX_COST_PER_CLICK);
   }
 
   // The purpose of calculating the CPA is to determine the average cost of acquiring 
@@ -185,11 +186,12 @@ class Formula extends IFormula {
     return result;
   }
 
-  async calculateAdvertiseScore(ctr, totalCost, adId, impressions) {
+  async calculateAdvertiseScore(ctr, adId, impressions) {
     const totalInteractions = await this.calculateTotalInteractions(adId);
     const engagementRate = this.calculateEngagementRate(totalInteractions, impressions || 1);
+    
     const score = 
-        ((Math.min(ctr, 100) + Math.min(engagementRate, 100)) / 3).toFixed(2);
+        ((Math.min(ctr, 100) + Math.min(engagementRate, 100)) / 2).toFixed(2);
     // Ensure score is between 0 and 100
     const limitScore = Math.min(Math.max(score, 0), 100);
 
