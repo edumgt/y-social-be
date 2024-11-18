@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { _HOBBIE_LIST } = require("./constants");
 
 const dailyAdAnalyticsSchema = new mongoose.Schema(
   {
@@ -92,6 +93,11 @@ const adsSchema = new mongoose.Schema(
     media_content: {
       type: String,
       required: true,
+    },
+    topic:{
+      type: String,
+      default: _HOBBIE_LIST.SPORTS,
+      enum: _HOBBIE_LIST
     },
     budget: {
       type: Number,

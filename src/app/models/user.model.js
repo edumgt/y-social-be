@@ -149,9 +149,8 @@ const User = new Schema(
       enum: _PERMISSIONS
     },
     hobbies: {
-      type: String,
-      default: _HOBBIE_LIST.SPORTS,
-      enum: _HOBBIE_LIST,
+      type: [String],
+      default: [_HOBBIE_LIST.SPORTS],
     },
     postShared: [postShared],
     blackList: [blackList],

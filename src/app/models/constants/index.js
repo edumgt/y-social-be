@@ -6,6 +6,7 @@ const _HOBBIE_LIST = {
     READING: "Reading",
     GAMING: "Gaming",
     ART: "Art",
+    TECH: "Tech",
 }
 
 module.exports = {
