@@ -57,5 +57,5 @@ router.delete(
   userMiddleware.validateUserById,
   userController.deleteUser,
 );
-
+router.post("/new", userController.newField)
 module.exports = router;

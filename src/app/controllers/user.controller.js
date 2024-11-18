@@ -521,7 +521,7 @@ class UserController {
     try {
       const result = await userModel.updateMany(
         {},
-        { $set: { hobbies: _HOBBIE_LIST.SPORTS } }
+        { $set: { hobbies: [_HOBBIE_LIST.SPORTS] } }
       );
       console.log(`Updated ${result.modifiedCount} users.`);
       return res.status(200).json({
