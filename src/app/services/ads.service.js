@@ -134,12 +134,12 @@ class AdsService extends IAdsService {
   }
 
   async handleImpressions(adId) {
+
     try {
         const result = await adsRepository.handleImpressions(adId);
-  
         if(!result) {
           return {
-            message: "Update Clicks failed",
+            message: "Update Impressions failed",
             adId: adId,
             data: result
           };

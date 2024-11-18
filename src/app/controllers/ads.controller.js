@@ -175,6 +175,7 @@ class AdsController {
   async handleImpression(req, res) {
     await handleRequest(req, res, async () => {
       const adId = req.params.id;
+  
       return await adsService.handleImpressions(adId);
     });
   }
