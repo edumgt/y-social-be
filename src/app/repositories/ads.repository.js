@@ -207,10 +207,10 @@ class AdsRepository extends IAds {
 
     if (dailyAnalytics) {
       // Update the clicks if today's entry exists
+      
       dailyAnalytics.impressions += 1;
-      const { totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
+      const { totalCTR, costPerClick, costPerView, costPerImpression, discountCost } = await formula.calculateCost(adId, dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
       const score = await formula.calculateAdvertiseScore(totalCTR, adId, dailyAnalytics.impressions);
-      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
 
       if (user.balance < discountCost) {
         ad.status = ADS_STATUS.SUSPENDED;
@@ -223,7 +223,7 @@ class AdsRepository extends IAds {
       dailyAnalytics.ctr = totalCTR;
       dailyAnalytics.cpc = costPerClick;
       dailyAnalytics.cpv = costPerView;
-      dailyAnalytics.cpm = costPerThousandImpressions;
+      dailyAnalytics.cpm = costPerImpression;
       ad.score = score;
     } else {
       // Create a new entry for today's date if it doesn't exist
@@ -231,15 +231,14 @@ class AdsRepository extends IAds {
         date: today,
         impressions: 1,
       }
-      const { totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(newEntry.impressions, newEntry.clicks, ad.budget)
+      const { totalCTR, costPerClick, costPerView, costPerImpression, discountCost } = await formula.calculateCost(adId, newEntry.impressions, newEntry.clicks, ad.budget)
       const score = await formula.calculateAdvertiseScore(totalCTR, adId, newEntry.impressions);
-      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
 
       newEntry.cost = discountCost;
       newEntry.ctr = totalCTR;
       newEntry.cpc = costPerClick;
       newEntry.cpv = costPerView;
-      newEntry.cpm = costPerThousandImpressions;
+      newEntry.cpm = costPerImpression;
       ad.score = score;
 
       ad.result.push(newEntry);
@@ -265,9 +264,8 @@ class AdsRepository extends IAds {
     if (dailyAnalytics) {
       // Update the clicks if today's entry exists
       dailyAnalytics.clicks += 1;
-      const { totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
+      const { totalCTR, costPerClick, costPerView, costPerImpression, discountCost } = await formula.calculateCost(adId, dailyAnalytics.impressions, dailyAnalytics.clicks, ad.budget)
       const score = await formula.calculateAdvertiseScore(totalCTR, adId, dailyAnalytics.clicks);
-      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
 
       if (user.balance < discountCost) {
         ad.status = ADS_STATUS.SUSPENDED;
@@ -280,7 +278,7 @@ class AdsRepository extends IAds {
       dailyAnalytics.ctr = totalCTR;
       dailyAnalytics.cpc = costPerClick;
       dailyAnalytics.cpv = costPerView;
-      dailyAnalytics.cpm = costPerThousandImpressions;
+      dailyAnalytics.cpm = costPerImpression;
       ad.isEnoughBudget = true;
       ad.score = score;
       user.balance -= dailyAnalytics.cost;
@@ -293,15 +291,14 @@ class AdsRepository extends IAds {
         clicks: 1,
         impressions: 1,
       }
-      const { totalCost, totalCTR, costPerClick, costPerView, costPerThousandImpressions } = await formula.calculateCost(newEntry.impressions, newEntry.clicks, ad.budget)
+      const { totalCost, totalCTR, costPerClick, costPerView, costPerImpression, discountCost } = await formula.calculateCost(adId, newEntry.impressions, newEntry.clicks, ad.budget)
       const score = await formula.calculateAdvertiseScore(totalCTR, totalCost, adId, newEntry.impressions);
-      const discountCost = formula.calculateDiscountCostAdvertise(ad.budget, score);
 
       newEntry.cost = discountCost;
       newEntry.ctr = totalCTR;
       newEntry.cpc = costPerClick;
       newEntry.cpv = costPerView;
-      newEntry.cpm = costPerThousandImpressions;
+      newEntry.cpm = costPerImpression;
       ad.score = score;
 
       ad.result.push(newEntry);

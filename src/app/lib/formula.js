@@ -24,24 +24,30 @@ class Formula extends IFormula {
   }
 
   // cost per day
-  async calculateCost(impressions, clicks, budget) {
+  async calculateCost(adId, impressions, clicks, budget) {
     try {
-      const costPerThousandImpressions = this.calculateCPM(budget, impressions) ;
-      const costPerClick = this.calculateCPC(budget, clicks, impressions) 
-      const costFromImpressions = this.calculateCFI(clicks, impressions, costPerThousandImpressions);
+      const costPerImpression = this.calculateCPM(budget, impressions) ;
+      const costPerClick = this.calculateCPC(budget, clicks) 
+      const costFromImpressions = this.calculateCFI(impressions, costPerImpression);
       const costFromClicks = this.calculateCostFromClicks(clicks, costPerClick);;
+
       const totalCTR = this.calculateCTR(clicks, impressions);
-      const totalCost = this.calculateTotalCostPerDay(costFromImpressions, costFromClicks);;
-      const costPerView = this.calculateCPV(totalCost, impressions);
+      const totalCost = this.calculateTotalCostPerDay(costFromImpressions, costFromClicks);
+
+      const score = await this.calculateAdvertiseScore(totalCTR, adId, impressions);
+
+      const discountCost = this.calculateDiscountCostAdvertise(totalCost, budget, score);
+      const costPerView = this.calculateCPV(discountCost, impressions);
 
       return {
-        costPerThousandImpressions,
+        costPerImpression,
         costPerClick,
         costFromImpressions,
         costFromClicks,
         totalCost,
         totalCTR,
-        costPerView
+        costPerView,
+        discountCost
       };
     } catch (error) {
       console.error("Error calculating cost:", error.message);
@@ -49,14 +55,15 @@ class Formula extends IFormula {
     }
   }
 
-  calculateDiscountCostAdvertise(budget, score) {
+  calculateDiscountCostAdvertise(totalCost, budget, score) {
     try {
         if(score <= 0) return 0;
-
+      
+        // 30% discount
         const MAX_DISCOUNT = 0.3;
         const discountPercentage = Math.min((score / 100) * MAX_DISCOUNT, MAX_DISCOUNT).toFixed(3);
         const discountAmount = budget * discountPercentage;
-        const finalCost = budget - discountAmount;
+        const finalCost = (totalCost - discountAmount).toFixed(1);
 
         return finalCost;
     } catch (error) {
@@ -81,13 +88,12 @@ class Formula extends IFormula {
   }
 
   // cost from impression
-  calculateCFI(clicks, impressions, costPerThousandImpressions) {
-    if (clicks <= 0 && impressions <= 0 && costPerThousandImpressions <= 0 
-      || isNaN(clicks) 
+  calculateCFI(impressions, costPerImpression) {
+    if (impressions <= 0 && costPerImpression <= 0 
       || isNaN(impressions) 
-      || isNaN(costPerThousandImpressions)) 
+      || isNaN(costPerImpression)) 
     return 0;
-    const result = Math.round((impressions * costPerThousandImpressions) / 1000);
+    const result = Math.round(impressions * costPerImpression);
     return result;
   }
 
@@ -150,7 +156,7 @@ class Formula extends IFormula {
   // that you advertise to people who don't fit in your ICP's (Ideal Customer Profiles).
   calculateCPM(budget, impressions) {
     if(impressions <= 0 && budget <= 0 || isNaN(budget) || isNaN(impressions)) return 0;
-    const result = Math.round(budget / (impressions / 1000));
+    const result = Math.round(budget / impressions);
     return result;
   }
 
@@ -162,13 +168,11 @@ class Formula extends IFormula {
   // One campaign—targeted at a broader audience—could have a much lower CPC than 
   // a different campaign targeted at a niche audience.
   // visit: https://adcalculators.com/cpc-cost-per-click-calculator/ to know more
-  calculateCPC(budget, totalClicks, impressions) {
-    if (totalClicks <= 0 && budget <= 0 || totalClicks <= 0 || isNaN(budget) || isNaN(totalClicks) || isNaN(impressions)) 
+  calculateCPC(budget, totalClicks) {
+    if (totalClicks <= 0 && budget <= 0 || totalClicks <= 0 || isNaN(budget) || isNaN(totalClicks)) 
       return 0;
     const result = Math.round(budget / totalClicks);
-    const effectiveCPC = (result * (totalClicks / impressions)).toFixed(2);
-    const MAX_COST_PER_CLICK = 15000;
-    return Math.min(effectiveCPC, MAX_COST_PER_CLICK);
+    return result;
   }
 
   // The purpose of calculating the CPA is to determine the average cost of acquiring 
