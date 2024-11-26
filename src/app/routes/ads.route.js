@@ -38,10 +38,8 @@ router.put(
 );
 
 router.post("/create", validateAdCreation, adsController.createAd);
-router.post("/:id/impressions", validateAds, adsController.handleImpression);
-router.post("/:id/clicks", validateAds, adsController.handleClicks);
-// router.post("/:id/impressions", validateAds, rateLimitImpressions, adsController.handleImpression);
-// router.post("/:id/clicks", validateAds, rateLimitClicks, adsController.handleClicks);
+router.post("/:id/impressions", validateAds, rateLimitImpressions, adsController.handleImpression);
+router.post("/:id/clicks", validateAds, rateLimitClicks, adsController.handleClicks);
 router.get("/user/:userId", adsController.getAdByUser);
 router.get("/trending", adsController.getAdByTrend);
 router.get("/get-all", adsController.getAllAds);
